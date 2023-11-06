@@ -1,0 +1,22 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "tasks",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "assignees",
+          "arrayConfig": "CONTAINS"
+        },
+        {
+          "fieldPath": "due",
+          "order": "ASCENDING"
+        }
+      ]
+    }
+  ]
+}
