@@ -4,6 +4,7 @@ import '/flutter_flow/flutter_flow_animations.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
+import '/custom_code/actions/index.dart' as actions;
 import '/flutter_flow/custom_functions.dart' as functions;
 import 'home_widget.dart' show HomeWidget;
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -19,6 +20,10 @@ class HomeModel extends FlutterFlowModel<HomeWidget> {
   ///  State fields for stateful widgets in this page.
 
   final unfocusNode = FocusNode();
+  // Stores action output result for [Custom Action - getTaskResponse] action in Container widget.
+  DocumentReference? taskResponse;
+  // Stores action output result for [Backend Call - Create Document] action in Container widget.
+  TaskResponsesRecord? newTaskResponse;
 
   /// Initialization and disposal methods.
 
