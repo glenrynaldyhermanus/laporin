@@ -10,8 +10,10 @@ import 'schema/tasks_record.dart';
 import 'schema/forms_record.dart';
 import 'schema/form_fields_record.dart';
 import 'schema/fields_record.dart';
-import 'schema/form_responses_record.dart';
 import 'schema/attendance_record.dart';
+import 'schema/task_responses_record.dart';
+import 'schema/business_record.dart';
+import 'schema/response_fields_record.dart';
 
 export 'dart:async' show StreamSubscription;
 export 'package:cloud_firestore/cloud_firestore.dart';
@@ -24,8 +26,10 @@ export 'schema/tasks_record.dart';
 export 'schema/forms_record.dart';
 export 'schema/form_fields_record.dart';
 export 'schema/fields_record.dart';
-export 'schema/form_responses_record.dart';
 export 'schema/attendance_record.dart';
+export 'schema/task_responses_record.dart';
+export 'schema/business_record.dart';
+export 'schema/response_fields_record.dart';
 
 /// Functions to query UsersRecords (as a Stream and as a Future).
 Future<int> queryUsersRecordCount({
@@ -215,46 +219,6 @@ Future<List<FieldsRecord>> queryFieldsRecordOnce({
       singleRecord: singleRecord,
     );
 
-/// Functions to query FormResponsesRecords (as a Stream and as a Future).
-Future<int> queryFormResponsesRecordCount({
-  DocumentReference? parent,
-  Query Function(Query)? queryBuilder,
-  int limit = -1,
-}) =>
-    queryCollectionCount(
-      FormResponsesRecord.collection(parent),
-      queryBuilder: queryBuilder,
-      limit: limit,
-    );
-
-Stream<List<FormResponsesRecord>> queryFormResponsesRecord({
-  DocumentReference? parent,
-  Query Function(Query)? queryBuilder,
-  int limit = -1,
-  bool singleRecord = false,
-}) =>
-    queryCollection(
-      FormResponsesRecord.collection(parent),
-      FormResponsesRecord.fromSnapshot,
-      queryBuilder: queryBuilder,
-      limit: limit,
-      singleRecord: singleRecord,
-    );
-
-Future<List<FormResponsesRecord>> queryFormResponsesRecordOnce({
-  DocumentReference? parent,
-  Query Function(Query)? queryBuilder,
-  int limit = -1,
-  bool singleRecord = false,
-}) =>
-    queryCollectionOnce(
-      FormResponsesRecord.collection(parent),
-      FormResponsesRecord.fromSnapshot,
-      queryBuilder: queryBuilder,
-      limit: limit,
-      singleRecord: singleRecord,
-    );
-
 /// Functions to query AttendanceRecords (as a Stream and as a Future).
 Future<int> queryAttendanceRecordCount({
   DocumentReference? parent,
@@ -290,6 +254,120 @@ Future<List<AttendanceRecord>> queryAttendanceRecordOnce({
     queryCollectionOnce(
       AttendanceRecord.collection(parent),
       AttendanceRecord.fromSnapshot,
+      queryBuilder: queryBuilder,
+      limit: limit,
+      singleRecord: singleRecord,
+    );
+
+/// Functions to query TaskResponsesRecords (as a Stream and as a Future).
+Future<int> queryTaskResponsesRecordCount({
+  Query Function(Query)? queryBuilder,
+  int limit = -1,
+}) =>
+    queryCollectionCount(
+      TaskResponsesRecord.collection,
+      queryBuilder: queryBuilder,
+      limit: limit,
+    );
+
+Stream<List<TaskResponsesRecord>> queryTaskResponsesRecord({
+  Query Function(Query)? queryBuilder,
+  int limit = -1,
+  bool singleRecord = false,
+}) =>
+    queryCollection(
+      TaskResponsesRecord.collection,
+      TaskResponsesRecord.fromSnapshot,
+      queryBuilder: queryBuilder,
+      limit: limit,
+      singleRecord: singleRecord,
+    );
+
+Future<List<TaskResponsesRecord>> queryTaskResponsesRecordOnce({
+  Query Function(Query)? queryBuilder,
+  int limit = -1,
+  bool singleRecord = false,
+}) =>
+    queryCollectionOnce(
+      TaskResponsesRecord.collection,
+      TaskResponsesRecord.fromSnapshot,
+      queryBuilder: queryBuilder,
+      limit: limit,
+      singleRecord: singleRecord,
+    );
+
+/// Functions to query BusinessRecords (as a Stream and as a Future).
+Future<int> queryBusinessRecordCount({
+  Query Function(Query)? queryBuilder,
+  int limit = -1,
+}) =>
+    queryCollectionCount(
+      BusinessRecord.collection,
+      queryBuilder: queryBuilder,
+      limit: limit,
+    );
+
+Stream<List<BusinessRecord>> queryBusinessRecord({
+  Query Function(Query)? queryBuilder,
+  int limit = -1,
+  bool singleRecord = false,
+}) =>
+    queryCollection(
+      BusinessRecord.collection,
+      BusinessRecord.fromSnapshot,
+      queryBuilder: queryBuilder,
+      limit: limit,
+      singleRecord: singleRecord,
+    );
+
+Future<List<BusinessRecord>> queryBusinessRecordOnce({
+  Query Function(Query)? queryBuilder,
+  int limit = -1,
+  bool singleRecord = false,
+}) =>
+    queryCollectionOnce(
+      BusinessRecord.collection,
+      BusinessRecord.fromSnapshot,
+      queryBuilder: queryBuilder,
+      limit: limit,
+      singleRecord: singleRecord,
+    );
+
+/// Functions to query ResponseFieldsRecords (as a Stream and as a Future).
+Future<int> queryResponseFieldsRecordCount({
+  DocumentReference? parent,
+  Query Function(Query)? queryBuilder,
+  int limit = -1,
+}) =>
+    queryCollectionCount(
+      ResponseFieldsRecord.collection(parent),
+      queryBuilder: queryBuilder,
+      limit: limit,
+    );
+
+Stream<List<ResponseFieldsRecord>> queryResponseFieldsRecord({
+  DocumentReference? parent,
+  Query Function(Query)? queryBuilder,
+  int limit = -1,
+  bool singleRecord = false,
+}) =>
+    queryCollection(
+      ResponseFieldsRecord.collection(parent),
+      ResponseFieldsRecord.fromSnapshot,
+      queryBuilder: queryBuilder,
+      limit: limit,
+      singleRecord: singleRecord,
+    );
+
+Future<List<ResponseFieldsRecord>> queryResponseFieldsRecordOnce({
+  DocumentReference? parent,
+  Query Function(Query)? queryBuilder,
+  int limit = -1,
+  bool singleRecord = false,
+}) =>
+    queryCollectionOnce(
+      ResponseFieldsRecord.collection(parent),
+      ResponseFieldsRecord.fromSnapshot,
       queryBuilder: queryBuilder,
       limit: limit,
       singleRecord: singleRecord,

@@ -118,9 +118,19 @@ class _TaskFormWidgetState extends State<TaskFormWidget> {
                 mainAxisSize: MainAxisSize.max,
                 children: [
                   Expanded(
-                    child: StreamBuilder<List<FormFieldsRecord>>(
-                      stream: queryFormFieldsRecord(
-                        parent: taskFormTasksRecord.form,
+                    child: StreamBuilder<List<TaskResponsesRecord>>(
+                      stream: queryTaskResponsesRecord(
+                        queryBuilder: (taskResponsesRecord) =>
+                            taskResponsesRecord
+                                .where(
+                                  'user',
+                                  isEqualTo: currentUserReference,
+                                )
+                                .where(
+                                  'task',
+                                  isEqualTo: widget.task,
+                                ),
+                        singleRecord: true,
                       ),
                       builder: (context, snapshot) {
                         // Customize what your widget looks like when it's loading.
@@ -136,25 +146,62 @@ class _TaskFormWidgetState extends State<TaskFormWidget> {
                             ),
                           );
                         }
-                        List<FormFieldsRecord> columnFormFieldsRecordList =
-                            snapshot.data!;
-                        return SingleChildScrollView(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.max,
-                            children:
-                                List.generate(columnFormFieldsRecordList.length,
-                                        (columnIndex) {
-                              final columnFormFieldsRecord =
-                                  columnFormFieldsRecordList[columnIndex];
-                              return DynamicFieldWidget(
-                                key: Key(
-                                    'Key0yv_${columnIndex}_of_${columnFormFieldsRecordList.length}'),
-                                formField: columnFormFieldsRecord,
-                                task: taskFormTasksRecord,
+                        List<TaskResponsesRecord>
+                            containerTaskResponsesRecordList = snapshot.data!;
+                        // Return an empty Container when the item does not exist.
+                        if (snapshot.data!.isEmpty) {
+                          return Container();
+                        }
+                        final containerTaskResponsesRecord =
+                            containerTaskResponsesRecordList.isNotEmpty
+                                ? containerTaskResponsesRecordList.first
+                                : null;
+                        return Container(
+                          width: double.infinity,
+                          height: double.infinity,
+                          decoration: BoxDecoration(),
+                          child: StreamBuilder<List<FormFieldsRecord>>(
+                            stream: queryFormFieldsRecord(
+                              parent: taskFormTasksRecord.form,
+                            ),
+                            builder: (context, snapshot) {
+                              // Customize what your widget looks like when it's loading.
+                              if (!snapshot.hasData) {
+                                return Center(
+                                  child: SizedBox(
+                                    width: 50.0,
+                                    height: 50.0,
+                                    child: SpinKitFoldingCube(
+                                      color:
+                                          FlutterFlowTheme.of(context).primary,
+                                      size: 50.0,
+                                    ),
+                                  ),
+                                );
+                              }
+                              List<FormFieldsRecord>
+                                  columnFormFieldsRecordList = snapshot.data!;
+                              return SingleChildScrollView(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.max,
+                                  children: List.generate(
+                                          columnFormFieldsRecordList.length,
+                                          (columnIndex) {
+                                    final columnFormFieldsRecord =
+                                        columnFormFieldsRecordList[columnIndex];
+                                    return DynamicFieldWidget(
+                                      key: Key(
+                                          'Key0yv_${columnIndex}_of_${columnFormFieldsRecordList.length}'),
+                                      formField: columnFormFieldsRecord,
+                                      taskResponse:
+                                          containerTaskResponsesRecord!,
+                                    );
+                                  })
+                                      .divide(SizedBox(height: 16.0))
+                                      .around(SizedBox(height: 16.0)),
+                                ),
                               );
-                            })
-                                    .divide(SizedBox(height: 16.0))
-                                    .around(SizedBox(height: 16.0)),
+                            },
                           ),
                         );
                       },
@@ -165,7 +212,8 @@ class _TaskFormWidgetState extends State<TaskFormWidget> {
                         EdgeInsetsDirectional.fromSTEB(16.0, 16.0, 16.0, 16.0),
                     child: FFButtonWidget(
                       onPressed: () async {
-                        await widget.task!.update(createTasksRecordData(
+                        await taskFormTasksRecord.reference
+                            .update(createTasksRecordData(
                           status: 'Done',
                           doneAt: getCurrentTimestamp,
                         ));

@@ -21,11 +21,11 @@ class DynamicFieldWidget extends StatefulWidget {
   const DynamicFieldWidget({
     Key? key,
     required this.formField,
-    required this.task,
+    required this.taskResponse,
   }) : super(key: key);
 
   final FormFieldsRecord? formField;
-  final TasksRecord? task;
+  final TaskResponsesRecord? taskResponse;
 
   @override
   _DynamicFieldWidgetState createState() => _DynamicFieldWidgetState();
@@ -45,7 +45,7 @@ class _DynamicFieldWidgetState extends State<DynamicFieldWidget> {
     super.initState();
     _model = createModel(context, () => DynamicFieldModel());
 
-    _model.textController ??= TextEditingController(text: 'test');
+    _model.textController ??= TextEditingController();
     _model.textFocusNode ??= FocusNode();
 
     WidgetsBinding.instance.addPostFrameCallback((_) => setState(() {}));
@@ -89,25 +89,25 @@ class _DynamicFieldWidgetState extends State<DynamicFieldWidget> {
                       Duration(milliseconds: 2000),
                       () async {
                         var _shouldSetState = false;
-                        _model.formResponse = await actions.getFormResponse(
-                          widget.task!.reference,
+                        _model.formResponse = await actions.getResponseField(
+                          widget.taskResponse!.reference,
                           widget.formField!.reference,
                         );
                         _shouldSetState = true;
                         if (_model.formResponse != null) {
                           await _model.formResponse!.reference
-                              .update(createFormResponsesRecordData(
+                              .update(createResponseFieldsRecordData(
                             answer: _model.textController.text,
                           ));
                           if (_shouldSetState) setState(() {});
                           return;
                         } else {
-                          await FormResponsesRecord.createDoc(
-                                  widget.task!.reference)
-                              .set(createFormResponsesRecordData(
-                            formField: widget.formField?.reference,
+                          await ResponseFieldsRecord.createDoc(
+                                  widget.taskResponse!.reference)
+                              .set(createResponseFieldsRecordData(
                             question: widget.formField?.question,
                             answer: _model.textController.text,
+                            formField: widget.formField?.reference,
                           ));
                           if (_shouldSetState) setState(() {});
                           return;
@@ -247,22 +247,22 @@ class _DynamicFieldWidgetState extends State<DynamicFieldWidget> {
                             }
 
                             _model.formResponseImage =
-                                await actions.getFormResponse(
-                              widget.task!.reference,
+                                await actions.getResponseField(
+                              widget.taskResponse!.reference,
                               widget.formField!.reference,
                             );
                             _shouldSetState = true;
                             if (_model.formResponseImage?.reference != null) {
                               await _model.formResponse!.reference
-                                  .update(createFormResponsesRecordData(
+                                  .update(createResponseFieldsRecordData(
                                 answer: _model.uploadedFileUrl,
                               ));
                               if (_shouldSetState) setState(() {});
                               return;
                             } else {
-                              await FormResponsesRecord.createDoc(
-                                      widget.task!.reference)
-                                  .set(createFormResponsesRecordData(
+                              await ResponseFieldsRecord.createDoc(
+                                      widget.taskResponse!.reference)
+                                  .set(createResponseFieldsRecordData(
                                 formField: widget.formField?.reference,
                                 question: widget.formField?.question,
                                 answer: _model.uploadedFileUrl,
