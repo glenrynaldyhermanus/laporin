@@ -148,10 +148,6 @@ class _TaskFormWidgetState extends State<TaskFormWidget> {
                         }
                         List<TaskResponsesRecord>
                             containerTaskResponsesRecordList = snapshot.data!;
-                        // Return an empty Container when the item does not exist.
-                        if (snapshot.data!.isEmpty) {
-                          return Container();
-                        }
                         final containerTaskResponsesRecord =
                             containerTaskResponsesRecordList.isNotEmpty
                                 ? containerTaskResponsesRecordList.first
