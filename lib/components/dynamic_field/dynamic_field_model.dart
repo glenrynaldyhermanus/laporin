@@ -23,8 +23,8 @@ class DynamicFieldModel extends FlutterFlowModel<DynamicFieldWidget> {
   FocusNode? textFocusNode;
   TextEditingController? textController;
   String? Function(BuildContext, String?)? textControllerValidator;
-  // Stores action output result for [Custom Action - getFormResponse] action in Text widget.
-  FormResponsesRecord? formResponse;
+  // Stores action output result for [Custom Action - getResponseField] action in Text widget.
+  ResponseFieldsRecord? formResponse;
   // State field(s) for Single-Selection widget.
   FormFieldController<String>? singleSelectionValueController;
   bool isDataUploading = false;
@@ -32,8 +32,8 @@ class DynamicFieldModel extends FlutterFlowModel<DynamicFieldWidget> {
       FFUploadedFile(bytes: Uint8List.fromList([]));
   String uploadedFileUrl = '';
 
-  // Stores action output result for [Custom Action - getFormResponse] action in Picture widget.
-  FormResponsesRecord? formResponseImage;
+  // Stores action output result for [Custom Action - getResponseField] action in Picture widget.
+  ResponseFieldsRecord? formResponseImage;
 
   /// Initialization and disposal methods.
 

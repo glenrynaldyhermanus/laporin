@@ -8,18 +8,18 @@ import 'package:flutter/material.dart';
 // Begin custom action code
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
 
-Future<FormResponsesRecord?> getFormResponse(
-  DocumentReference task,
+Future<ResponseFieldsRecord?> getResponseField(
+  DocumentReference taskResponse,
   DocumentReference formField,
 ) async {
-  DocumentSnapshot taskSnapshot = await task.get();
+  DocumentSnapshot taskSnapshot = await taskResponse.get();
   if (!taskSnapshot.exists) {
     return null;
   }
 
   // Get the form_responses subcollection of the task document
   CollectionReference formResponsesCollection =
-      task.collection('form_responses');
+      taskResponse.collection('response_fields');
 
   // Query the form_responses subcollection for documents where form_field is equal to formField
   QuerySnapshot formResponsesQuery = await formResponsesCollection
@@ -31,5 +31,5 @@ Future<FormResponsesRecord?> getFormResponse(
     return null;
   }
 
-  return FormResponsesRecord.fromSnapshot(formResponsesQuery.docs.first);
+  return ResponseFieldsRecord.fromSnapshot(formResponsesQuery.docs.first);
 }
