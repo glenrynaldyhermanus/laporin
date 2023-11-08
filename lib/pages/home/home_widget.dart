@@ -4,6 +4,7 @@ import '/flutter_flow/flutter_flow_animations.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
+import '/custom_code/actions/index.dart' as actions;
 import '/flutter_flow/custom_functions.dart' as functions;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -631,15 +632,67 @@ class _HomeWidgetState extends State<HomeWidget> with TickerProviderStateMixin {
                             hoverColor: Colors.transparent,
                             highlightColor: Colors.transparent,
                             onTap: () async {
-                              context.pushNamed(
-                                'TaskForm',
-                                queryParameters: {
-                                  'task': serializeParam(
-                                    columnTasksRecord.reference,
-                                    ParamType.DocumentReference,
-                                  ),
-                                }.withoutNulls,
+                              var _shouldSetState = false;
+                              _model.taskResponse =
+                                  await actions.getTaskResponse(
+                                currentUserReference!,
+                                columnTasksRecord.reference,
                               );
+                              _shouldSetState = true;
+                              if (_model.taskResponse != null) {
+                                await _model.taskResponse!
+                                    .update(createTaskResponsesRecordData(
+                                  resumeAt: getCurrentTimestamp,
+                                ));
+
+                                context.pushNamed(
+                                  'TaskForm',
+                                  queryParameters: {
+                                    'task': serializeParam(
+                                      columnTasksRecord.reference,
+                                      ParamType.DocumentReference,
+                                    ),
+                                  }.withoutNulls,
+                                );
+
+                                if (_shouldSetState) setState(() {});
+                                return;
+                              } else {
+                                var taskResponsesRecordReference =
+                                    TaskResponsesRecord.collection.doc();
+                                await taskResponsesRecordReference
+                                    .set(createTaskResponsesRecordData(
+                                  user: currentUserReference,
+                                  task: columnTasksRecord.reference,
+                                  form: columnTasksRecord.form,
+                                  startAt: getCurrentTimestamp,
+                                ));
+                                _model.newTaskResponse =
+                                    TaskResponsesRecord.getDocumentFromData(
+                                        createTaskResponsesRecordData(
+                                          user: currentUserReference,
+                                          task: columnTasksRecord.reference,
+                                          form: columnTasksRecord.form,
+                                          startAt: getCurrentTimestamp,
+                                        ),
+                                        taskResponsesRecordReference);
+                                _shouldSetState = true;
+
+                                context.pushNamed(
+                                  'TaskForm',
+                                  queryParameters: {
+                                    'task': serializeParam(
+                                      columnTasksRecord.reference,
+                                      ParamType.DocumentReference,
+                                    ),
+                                  }.withoutNulls,
+                                );
+
+                                if (_shouldSetState) setState(() {});
+                                return;
+                              }
+
+                              if (_shouldSetState) setState(() {});
                             },
                             child: Container(
                               width: double.infinity,
