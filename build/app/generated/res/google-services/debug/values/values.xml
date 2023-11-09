@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="gcm_defaultSenderId" translatable="false">610053201327</string>
+    <string name="google_api_key" translatable="false">AIzaSyC39uTrOLm8eofx-PYRWHpcu6E0hJqPK0c</string>
+    <string name="google_app_id" translatable="false">1:610053201327:android:6131915f38dc543802a35a</string>
+    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyC39uTrOLm8eofx-PYRWHpcu6E0hJqPK0c</string>
+    <string name="google_storage_bucket" translatable="false">laporin-2a13f.appspot.com</string>
+    <string name="project_id" translatable="false">laporin-2a13f</string>
+</resources>
