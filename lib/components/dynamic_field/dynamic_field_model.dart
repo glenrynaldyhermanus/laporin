@@ -1,6 +1,4 @@
-import '/auth/firebase_auth/auth_util.dart';
-import '/backend/backend.dart';
-import '/backend/firebase_storage/storage.dart';
+import '/backend/supabase/supabase.dart';
 import '/flutter_flow/flutter_flow_radio_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -8,7 +6,6 @@ import '/flutter_flow/form_field_controller.dart';
 import '/flutter_flow/upload_data.dart';
 import '/custom_code/actions/index.dart' as actions;
 import 'dynamic_field_widget.dart' show DynamicFieldWidget;
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_debounce/easy_debounce.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -24,7 +21,7 @@ class DynamicFieldModel extends FlutterFlowModel<DynamicFieldWidget> {
   TextEditingController? textController;
   String? Function(BuildContext, String?)? textControllerValidator;
   // Stores action output result for [Custom Action - getResponseField] action in Text widget.
-  ResponseFieldsRecord? formResponse;
+  ResponseFieldsRow? textResponseField;
   // State field(s) for Single-Selection widget.
   FormFieldController<String>? singleSelectionValueController;
   bool isDataUploading = false;
@@ -33,7 +30,7 @@ class DynamicFieldModel extends FlutterFlowModel<DynamicFieldWidget> {
   String uploadedFileUrl = '';
 
   // Stores action output result for [Custom Action - getResponseField] action in Picture widget.
-  ResponseFieldsRecord? formResponseImage;
+  ResponseFieldsRow? responseField;
 
   /// Initialization and disposal methods.
 

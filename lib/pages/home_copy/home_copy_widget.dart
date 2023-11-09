@@ -1,4 +1,4 @@
-import '/auth/firebase_auth/auth_util.dart';
+import '/auth/supabase_auth/auth_util.dart';
 import '/flutter_flow/flutter_flow_animations.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -536,17 +536,6 @@ class _HomeCopyWidgetState extends State<HomeCopyWidget>
     super.initState();
     _model = createModel(context, () => HomeCopyModel());
 
-    // On page load action.
-    SchedulerBinding.instance.addPostFrameCallback((_) async {
-      if (currentUserDisplayName == null || currentUserDisplayName == '') {
-        context.goNamed('EditProfile');
-
-        return;
-      } else {
-        return;
-      }
-    });
-
     setupAnimations(
       animationsMap.values.where((anim) =>
           anim.trigger == AnimationTrigger.onActionTrigger ||
@@ -574,6 +563,8 @@ class _HomeCopyWidgetState extends State<HomeCopyWidget>
         ),
       );
     }
+
+    context.watch<FFAppState>();
 
     return GestureDetector(
       onTap: () => _model.unfocusNode.canRequestFocus

@@ -1,4 +1,5 @@
-import '/auth/firebase_auth/auth_util.dart';
+import '/auth/supabase_auth/auth_util.dart';
+import '/backend/supabase/supabase.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
@@ -27,6 +28,9 @@ class _RegisterWidgetState extends State<RegisterWidget> {
   void initState() {
     super.initState();
     _model = createModel(context, () => RegisterModel());
+
+    _model.nameController ??= TextEditingController();
+    _model.nameFocusNode ??= FocusNode();
 
     _model.emailAddressController ??= TextEditingController();
     _model.emailAddressFocusNode ??= FocusNode();
@@ -57,6 +61,8 @@ class _RegisterWidgetState extends State<RegisterWidget> {
         ),
       );
     }
+
+    context.watch<FFAppState>();
 
     return GestureDetector(
       onTap: () => _model.unfocusNode.canRequestFocus
@@ -133,6 +139,69 @@ class _RegisterWidgetState extends State<RegisterWidget> {
                                     'Let\'s get started by filling out the form below.',
                                     style: FlutterFlowTheme.of(context)
                                         .labelMedium,
+                                  ),
+                                ),
+                                Padding(
+                                  padding: EdgeInsetsDirectional.fromSTEB(
+                                      0.0, 0.0, 0.0, 16.0),
+                                  child: Container(
+                                    width: 370.0,
+                                    child: TextFormField(
+                                      controller: _model.nameController,
+                                      focusNode: _model.nameFocusNode,
+                                      autofocus: true,
+                                      autofillHints: [AutofillHints.email],
+                                      obscureText: false,
+                                      decoration: InputDecoration(
+                                        labelText: 'Name',
+                                        labelStyle: FlutterFlowTheme.of(context)
+                                            .labelMedium,
+                                        enabledBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: FlutterFlowTheme.of(context)
+                                                .primaryBackground,
+                                            width: 2.0,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(12.0),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: FlutterFlowTheme.of(context)
+                                                .primary,
+                                            width: 2.0,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(12.0),
+                                        ),
+                                        errorBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: FlutterFlowTheme.of(context)
+                                                .error,
+                                            width: 2.0,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(12.0),
+                                        ),
+                                        focusedErrorBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: FlutterFlowTheme.of(context)
+                                                .error,
+                                            width: 2.0,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(12.0),
+                                        ),
+                                        filled: true,
+                                        fillColor: FlutterFlowTheme.of(context)
+                                            .primaryBackground,
+                                      ),
+                                      style: FlutterFlowTheme.of(context)
+                                          .bodyMedium,
+                                      keyboardType: TextInputType.emailAddress,
+                                      validator: _model.nameControllerValidator
+                                          .asValidator(context),
+                                    ),
                                   ),
                                 ),
                                 Padding(
@@ -368,6 +437,7 @@ class _RegisterWidgetState extends State<RegisterWidget> {
                                       0.0, 0.0, 0.0, 16.0),
                                   child: FFButtonWidget(
                                     onPressed: () async {
+                                      await authManager.refreshUser();
                                       GoRouter.of(context).prepareAuthEvent();
                                       if (_model.passwordController.text !=
                                           _model
@@ -393,7 +463,14 @@ class _RegisterWidgetState extends State<RegisterWidget> {
                                         return;
                                       }
 
-                                      context.goNamedAuth(
+                                      await UsersTable().insert({
+                                        'uuid': currentUserUid,
+                                        'email':
+                                            currentUserEmailVerified.toString(),
+                                        'name': _model.nameController.text,
+                                      });
+
+                                      context.pushNamedAuth(
                                           'Home', context.mounted);
                                     },
                                     text: 'Create Account',

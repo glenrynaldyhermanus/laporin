@@ -9,25 +9,22 @@ import 'package:flutter/material.dart';
 // Begin custom action code
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
 
-Future<ResponseFieldsRow?> getResponseField(
-  int fieldId,
-  int responseId,
+Future<ResponsesRow?> getResponseByUserTask(
+  int userId,
+  int taskId,
 ) async {
   // Add your function code here!
-  final result = await ResponseFieldsTable().queryRows(
+  final result = await ResponsesTable().queryRows(
     queryFn: (q) => q
         .eq(
-          'field_id',
-          fieldId,
+          'user_id',
+          userId,
         )
-        .eq(
-          'response_id',
-          responseId,
-        ),
+        .eq('task_id', taskId),
   );
 
   if (result.isNotEmpty) {
-    return result.first;
+    return result[0];
   }
   return null;
 }

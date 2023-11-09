@@ -5,8 +5,10 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:go_router/go_router.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
-import '/backend/backend.dart';
 
+import '/backend/schema/structs/index.dart';
+
+import '/backend/supabase/supabase.dart';
 import '/auth/base_auth_user_provider.dart';
 
 import '/index.dart';
@@ -132,18 +134,13 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           builder: (context, params) => HomeCopyWidget(),
         ),
         FFRoute(
-          name: 'CreateTask',
-          path: '/createTask',
-          requireAuth: true,
-          builder: (context, params) => CreateTaskWidget(),
-        ),
-        FFRoute(
           name: 'TaskForm',
-          path: '/taskForm',
+          path: '/task/form',
           requireAuth: true,
           builder: (context, params) => TaskFormWidget(
-            task: params.getParam(
-                'task', ParamType.DocumentReference, false, ['tasks']),
+            task: params.getParam<TasksRow>('task', ParamType.SupabaseRow),
+            response: params.getParam<ResponsesRow>(
+                'response', ParamType.SupabaseRow),
           ),
         )
       ].map((r) => r.toRoute(appStateNotifier)).toList(),
@@ -263,7 +260,6 @@ class FFParameters {
     String paramName,
     ParamType type, [
     bool isList = false,
-    List<String>? collectionNamePath,
   ]) {
     if (futureParamValues.containsKey(paramName)) {
       return futureParamValues[paramName];
@@ -277,8 +273,11 @@ class FFParameters {
       return param;
     }
     // Return serialized value.
-    return deserializeParam<T>(param, type, isList,
-        collectionNamePath: collectionNamePath);
+    return deserializeParam<T>(
+      param,
+      type,
+      isList,
+    );
   }
 }
 

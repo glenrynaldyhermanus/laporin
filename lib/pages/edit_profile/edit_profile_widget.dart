@@ -1,6 +1,5 @@
-import '/auth/firebase_auth/auth_util.dart';
-import '/backend/backend.dart';
-import '/backend/firebase_storage/storage.dart';
+import '/auth/supabase_auth/auth_util.dart';
+import '/backend/supabase/supabase.dart';
 import '/flutter_flow/flutter_flow_drop_down.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -9,7 +8,6 @@ import '/flutter_flow/form_field_controller.dart';
 import '/flutter_flow/upload_data.dart';
 import '/flutter_flow/custom_functions.dart' as functions;
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -63,6 +61,8 @@ class _EditProfileWidgetState extends State<EditProfileWidget> {
       );
     }
 
+    context.watch<FFAppState>();
+
     return Scaffold(
       key: scaffoldKey,
       backgroundColor: FlutterFlowTheme.of(context).secondaryBackground,
@@ -100,6 +100,8 @@ class _EditProfileWidgetState extends State<EditProfileWidget> {
                       final selectedMedia =
                           await selectMediaWithSourceBottomSheet(
                         context: context,
+                        storageFolderPath:
+                            'profile_pictures/${FFAppState().authUser.uuid}/',
                         imageQuality: 80,
                         allowPhoto: true,
                         backgroundColor:
@@ -115,11 +117,6 @@ class _EditProfileWidgetState extends State<EditProfileWidget> {
 
                         var downloadUrls = <String>[];
                         try {
-                          showUploadMessage(
-                            context,
-                            'Uploading file...',
-                            showLoading: true,
-                          );
                           selectedUploadedFiles = selectedMedia
                               .map((m) => FFUploadedFile(
                                     name: m.storagePath.split('/').last,
@@ -130,17 +127,11 @@ class _EditProfileWidgetState extends State<EditProfileWidget> {
                                   ))
                               .toList();
 
-                          downloadUrls = (await Future.wait(
-                            selectedMedia.map(
-                              (m) async =>
-                                  await uploadData(m.storagePath, m.bytes),
-                            ),
-                          ))
-                              .where((u) => u != null)
-                              .map((u) => u!)
-                              .toList();
+                          downloadUrls = await uploadSupabaseStorageFiles(
+                            bucketName: 'users',
+                            selectedFiles: selectedMedia,
+                          );
                         } finally {
-                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
                           _model.isDataUploading = false;
                         }
                         if (selectedUploadedFiles.length ==
@@ -151,10 +142,8 @@ class _EditProfileWidgetState extends State<EditProfileWidget> {
                                 selectedUploadedFiles.first;
                             _model.uploadedFileUrl = downloadUrls.first;
                           });
-                          showUploadMessage(context, 'Success!');
                         } else {
                           setState(() {});
-                          showUploadMessage(context, 'Failed to upload data');
                           return;
                         }
                       }
@@ -295,8 +284,11 @@ class _EditProfileWidgetState extends State<EditProfileWidget> {
               padding: EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 12.0),
               child: FlutterFlowDropDown<String>(
                 controller: _model.genderValueController ??=
-                    FormFieldController<String>(null),
-                options: ['Laki-laki', 'Perempuan'],
+                    FormFieldController<String>(
+                  _model.genderValue ??= '',
+                ),
+                options: List<String>.from(['m', 'f']),
+                optionLabels: ['Laki-laki', 'Perempuan'],
                 onChanged: (val) => setState(() => _model.genderValue = val),
                 width: double.infinity,
                 height: 56.0,
@@ -324,12 +316,20 @@ class _EditProfileWidgetState extends State<EditProfileWidget> {
                 padding: EdgeInsetsDirectional.fromSTEB(0.0, 24.0, 0.0, 0.0),
                 child: FFButtonWidget(
                   onPressed: () async {
-                    await currentUserReference!.update(createUsersRecordData(
-                      displayName: _model.nameController.text,
-                      gender: _model.genderValue,
-                      birthdate: functions.dateFromStringDdMmYyyy(
-                          _model.birthdateController.text),
-                    ));
+                    await UsersTable().update(
+                      data: {
+                        'picture_url': _model.uploadedFileUrl,
+                        'name': _model.nameController.text,
+                        'gender': _model.genderValue,
+                        'birthdate': supaSerialize<DateTime>(
+                            functions.dateFromStringDdMmYyyy(
+                                _model.birthdateController.text)),
+                      },
+                      matchingRows: (rows) => rows.eq(
+                        'uuid',
+                        currentUserUid,
+                      ),
+                    );
 
                     context.goNamed('Home');
                   },

@@ -9,25 +9,17 @@ import 'package:flutter/material.dart';
 // Begin custom action code
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
 
-Future<ResponseFieldsRow?> getResponseField(
-  int fieldId,
-  int responseId,
-) async {
-  // Add your function code here!
-  final result = await ResponseFieldsTable().queryRows(
-    queryFn: (q) => q
-        .eq(
-          'field_id',
-          fieldId,
-        )
-        .eq(
-          'response_id',
-          responseId,
-        ),
+Future<UsersRow?> getUserByUuid(String userUuid) async {
+  // return UsersRow supabase where uuid eq userUid return null if empty
+  final result = await UsersTable().queryRows(
+    queryFn: (q) => q.eq(
+      'uuid',
+      userUuid,
+    ),
   );
 
   if (result.isNotEmpty) {
-    return result.first;
+    return result[0];
   }
   return null;
 }
