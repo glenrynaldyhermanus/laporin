@@ -548,7 +548,8 @@ class _HomeWidgetState extends State<HomeWidget> with TickerProviderStateMixin {
                                                             .fromSTEB(0.0, 8.0,
                                                                 0.0, 0.0),
                                                     child: Text(
-                                                      rowUserAttendancesRow !=
+                                                      rowUserAttendancesRow
+                                                                  ?.clockedOutAt !=
                                                               null
                                                           ? dateTimeFormat(
                                                               'd/M H:mm',
