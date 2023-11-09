@@ -1,11 +1,9 @@
-import '/auth/firebase_auth/auth_util.dart';
-import '/backend/backend.dart';
+import '/backend/supabase/supabase.dart';
 import '/components/dynamic_field/dynamic_field_widget.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -18,9 +16,11 @@ class TaskFormWidget extends StatefulWidget {
   const TaskFormWidget({
     Key? key,
     required this.task,
+    required this.response,
   }) : super(key: key);
 
-  final DocumentReference? task;
+  final TasksRow? task;
+  final ResponsesRow? response;
 
   @override
   _TaskFormWidgetState createState() => _TaskFormWidgetState();
@@ -57,8 +57,15 @@ class _TaskFormWidgetState extends State<TaskFormWidget> {
       );
     }
 
-    return StreamBuilder<TasksRecord>(
-      stream: TasksRecord.getDocument(widget.task!),
+    context.watch<FFAppState>();
+
+    return FutureBuilder<List<TasksRow>>(
+      future: TasksTable().querySingleRow(
+        queryFn: (q) => q.eq(
+          'id',
+          widget.task?.id,
+        ),
+      ),
       builder: (context, snapshot) {
         // Customize what your widget looks like when it's loading.
         if (!snapshot.hasData) {
@@ -76,7 +83,9 @@ class _TaskFormWidgetState extends State<TaskFormWidget> {
             ),
           );
         }
-        final taskFormTasksRecord = snapshot.data!;
+        List<TasksRow> taskFormTasksRowList = snapshot.data!;
+        final taskFormTasksRow =
+            taskFormTasksRowList.isNotEmpty ? taskFormTasksRowList.first : null;
         return GestureDetector(
           onTap: () => _model.unfocusNode.canRequestFocus
               ? FocusScope.of(context).requestFocus(_model.unfocusNode)
@@ -102,7 +111,7 @@ class _TaskFormWidgetState extends State<TaskFormWidget> {
                 },
               ),
               title: Text(
-                taskFormTasksRecord.name,
+                taskFormTasksRow!.name,
                 style: FlutterFlowTheme.of(context).labelLarge.override(
                       fontFamily: 'Montserrat',
                       color: FlutterFlowTheme.of(context).primaryText,
@@ -118,89 +127,53 @@ class _TaskFormWidgetState extends State<TaskFormWidget> {
                 mainAxisSize: MainAxisSize.max,
                 children: [
                   Expanded(
-                    child: StreamBuilder<List<TaskResponsesRecord>>(
-                      stream: queryTaskResponsesRecord(
-                        queryBuilder: (taskResponsesRecord) =>
-                            taskResponsesRecord
-                                .where(
-                                  'user',
-                                  isEqualTo: currentUserReference,
-                                )
-                                .where(
-                                  'task',
-                                  isEqualTo: widget.task,
+                    child: Container(
+                      width: double.infinity,
+                      height: double.infinity,
+                      decoration: BoxDecoration(),
+                      child: FutureBuilder<List<FieldsRow>>(
+                        future: FieldsTable().queryRows(
+                          queryFn: (q) => q.eq(
+                            'form_id',
+                            taskFormTasksRow?.formId,
+                          ),
+                        ),
+                        builder: (context, snapshot) {
+                          // Customize what your widget looks like when it's loading.
+                          if (!snapshot.hasData) {
+                            return Center(
+                              child: SizedBox(
+                                width: 50.0,
+                                height: 50.0,
+                                child: SpinKitFoldingCube(
+                                  color: FlutterFlowTheme.of(context).primary,
+                                  size: 50.0,
                                 ),
-                        singleRecord: true,
-                      ),
-                      builder: (context, snapshot) {
-                        // Customize what your widget looks like when it's loading.
-                        if (!snapshot.hasData) {
-                          return Center(
-                            child: SizedBox(
-                              width: 50.0,
-                              height: 50.0,
-                              child: SpinKitFoldingCube(
-                                color: FlutterFlowTheme.of(context).primary,
-                                size: 50.0,
                               ),
-                            ),
-                          );
-                        }
-                        List<TaskResponsesRecord>
-                            containerTaskResponsesRecordList = snapshot.data!;
-                        final containerTaskResponsesRecord =
-                            containerTaskResponsesRecordList.isNotEmpty
-                                ? containerTaskResponsesRecordList.first
-                                : null;
-                        return Container(
-                          width: double.infinity,
-                          height: double.infinity,
-                          decoration: BoxDecoration(),
-                          child: StreamBuilder<List<FormFieldsRecord>>(
-                            stream: queryFormFieldsRecord(
-                              parent: taskFormTasksRecord.form,
-                            ),
-                            builder: (context, snapshot) {
-                              // Customize what your widget looks like when it's loading.
-                              if (!snapshot.hasData) {
-                                return Center(
-                                  child: SizedBox(
-                                    width: 50.0,
-                                    height: 50.0,
-                                    child: SpinKitFoldingCube(
-                                      color:
-                                          FlutterFlowTheme.of(context).primary,
-                                      size: 50.0,
-                                    ),
-                                  ),
-                                );
-                              }
-                              List<FormFieldsRecord>
-                                  columnFormFieldsRecordList = snapshot.data!;
-                              return SingleChildScrollView(
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.max,
-                                  children: List.generate(
-                                          columnFormFieldsRecordList.length,
+                            );
+                          }
+                          List<FieldsRow> columnFieldsRowList = snapshot.data!;
+                          return SingleChildScrollView(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.max,
+                              children:
+                                  List.generate(columnFieldsRowList.length,
                                           (columnIndex) {
-                                    final columnFormFieldsRecord =
-                                        columnFormFieldsRecordList[columnIndex];
-                                    return DynamicFieldWidget(
-                                      key: Key(
-                                          'Key0yv_${columnIndex}_of_${columnFormFieldsRecordList.length}'),
-                                      formField: columnFormFieldsRecord,
-                                      taskResponse:
-                                          containerTaskResponsesRecord!,
-                                    );
-                                  })
+                                final columnFieldsRow =
+                                    columnFieldsRowList[columnIndex];
+                                return DynamicFieldWidget(
+                                  key: Key(
+                                      'Key0yv_${columnIndex}_of_${columnFieldsRowList.length}'),
+                                  field: columnFieldsRow,
+                                  response: widget.response!,
+                                );
+                              })
                                       .divide(SizedBox(height: 16.0))
                                       .around(SizedBox(height: 16.0)),
-                                ),
-                              );
-                            },
-                          ),
-                        );
-                      },
+                            ),
+                          );
+                        },
+                      ),
                     ),
                   ),
                   Padding(
@@ -208,11 +181,15 @@ class _TaskFormWidgetState extends State<TaskFormWidget> {
                         EdgeInsetsDirectional.fromSTEB(16.0, 16.0, 16.0, 16.0),
                     child: FFButtonWidget(
                       onPressed: () async {
-                        await taskFormTasksRecord.reference
-                            .update(createTasksRecordData(
-                          status: 'Done',
-                          doneAt: getCurrentTimestamp,
-                        ));
+                        await TasksTable().update(
+                          data: {
+                            'status': 2,
+                          },
+                          matchingRows: (rows) => rows.eq(
+                            'id',
+                            taskFormTasksRow?.id,
+                          ),
+                        );
                         context.safePop();
                       },
                       text: 'Save',

@@ -1,13 +1,10 @@
-import '/auth/firebase_auth/auth_util.dart';
-import '/backend/backend.dart';
-import '/backend/firebase_storage/storage.dart';
+import '/backend/supabase/supabase.dart';
 import '/flutter_flow/flutter_flow_radio_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/form_field_controller.dart';
 import '/flutter_flow/upload_data.dart';
 import '/custom_code/actions/index.dart' as actions;
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_debounce/easy_debounce.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -20,12 +17,12 @@ export 'dynamic_field_model.dart';
 class DynamicFieldWidget extends StatefulWidget {
   const DynamicFieldWidget({
     Key? key,
-    required this.formField,
-    required this.taskResponse,
+    required this.field,
+    required this.response,
   }) : super(key: key);
 
-  final FormFieldsRecord? formField;
-  final TaskResponsesRecord? taskResponse;
+  final FieldsRow? field;
+  final ResponsesRow? response;
 
   @override
   _DynamicFieldWidgetState createState() => _DynamicFieldWidgetState();
@@ -60,6 +57,8 @@ class _DynamicFieldWidgetState extends State<DynamicFieldWidget> {
 
   @override
   Widget build(BuildContext context) {
+    context.watch<FFAppState>();
+
     return Padding(
       padding: EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
       child: Container(
@@ -73,14 +72,14 @@ class _DynamicFieldWidgetState extends State<DynamicFieldWidget> {
           children: [
             Text(
               valueOrDefault<String>(
-                widget.formField?.question,
-                'Question',
+                widget.field?.question,
+                'Q :',
               ),
               style: FlutterFlowTheme.of(context).bodyMedium,
             ),
             Builder(
               builder: (context) {
-                if (widget.formField?.field?.id == 'dcwGbvd7lKDGs7Mn4zPU') {
+                if (widget.field?.fieldTypeId == 1) {
                   return TextFormField(
                     controller: _model.textController,
                     focusNode: _model.textFocusNode,
@@ -89,26 +88,30 @@ class _DynamicFieldWidgetState extends State<DynamicFieldWidget> {
                       Duration(milliseconds: 2000),
                       () async {
                         var _shouldSetState = false;
-                        _model.formResponse = await actions.getResponseField(
-                          widget.taskResponse!.reference,
-                          widget.formField!.reference,
+                        _model.textResponseField =
+                            await actions.getResponseField(
+                          widget.field!.id,
+                          widget.response!.id,
                         );
                         _shouldSetState = true;
-                        if (_model.formResponse != null) {
-                          await _model.formResponse!.reference
-                              .update(createResponseFieldsRecordData(
-                            answer: _model.textController.text,
-                          ));
+                        if (_model.textResponseField != null) {
+                          await ResponseFieldsTable().update(
+                            data: {
+                              'answer': _model.textController.text,
+                            },
+                            matchingRows: (rows) => rows.eq(
+                              'id',
+                              _model.textResponseField?.id,
+                            ),
+                          );
                           if (_shouldSetState) setState(() {});
                           return;
                         } else {
-                          await ResponseFieldsRecord.createDoc(
-                                  widget.taskResponse!.reference)
-                              .set(createResponseFieldsRecordData(
-                            question: widget.formField?.question,
-                            answer: _model.textController.text,
-                            formField: widget.formField?.reference,
-                          ));
+                          await ResponseFieldsTable().insert({
+                            'field_id': widget.field?.id,
+                            'response_id': widget.response?.id,
+                            'answer': _model.textController.text,
+                          });
                           if (_shouldSetState) setState(() {});
                           return;
                         }
@@ -152,8 +155,7 @@ class _DynamicFieldWidgetState extends State<DynamicFieldWidget> {
                     validator:
                         _model.textControllerValidator.asValidator(context),
                   );
-                } else if (widget.formField?.field?.id ==
-                    'K3D6DJyZbrWki3C7IoZE') {
+                } else if (widget.field?.fieldTypeId == 4) {
                   return FlutterFlowRadioButton(
                     options: ['Option 1', 'Option 2'].toList(),
                     onChanged: (val) => setState(() {}),
@@ -171,17 +173,16 @@ class _DynamicFieldWidgetState extends State<DynamicFieldWidget> {
                     horizontalAlignment: WrapAlignment.start,
                     verticalAlignment: WrapCrossAlignment.start,
                   );
-                } else if (widget.formField?.field?.id ==
-                    'O1FqDM12BPNHaM8utVWY') {
+                } else if (widget.field?.fieldTypeId == 6) {
                   return Builder(
                     builder: (context) {
-                      if (_model.uploadedFileUrl != null &&
-                          _model.uploadedFileUrl != '') {
+                      if (_model.textController.text != null &&
+                          _model.textController.text != '') {
                         return ClipRRect(
                           borderRadius: BorderRadius.circular(16.0),
                           child: Image.network(
                             getCORSProxyUrl(
-                              _model.uploadedFileUrl,
+                              'https://picsum.photos/seed/623/600',
                             ),
                             width: double.infinity,
                             height: 180.0,
@@ -199,6 +200,7 @@ class _DynamicFieldWidgetState extends State<DynamicFieldWidget> {
                             final selectedMedia =
                                 await selectMediaWithSourceBottomSheet(
                               context: context,
+                              storageFolderPath: '${widget.response?.uuid}',
                               allowPhoto: true,
                               pickerFontFamily: 'Montserrat',
                             );
@@ -220,15 +222,10 @@ class _DynamicFieldWidgetState extends State<DynamicFieldWidget> {
                                         ))
                                     .toList();
 
-                                downloadUrls = (await Future.wait(
-                                  selectedMedia.map(
-                                    (m) async => await uploadData(
-                                        m.storagePath, m.bytes),
-                                  ),
-                                ))
-                                    .where((u) => u != null)
-                                    .map((u) => u!)
-                                    .toList();
+                                downloadUrls = await uploadSupabaseStorageFiles(
+                                  bucketName: 'responses',
+                                  selectedFiles: selectedMedia,
+                                );
                               } finally {
                                 _model.isDataUploading = false;
                               }
@@ -246,27 +243,30 @@ class _DynamicFieldWidgetState extends State<DynamicFieldWidget> {
                               }
                             }
 
-                            _model.formResponseImage =
+                            _model.responseField =
                                 await actions.getResponseField(
-                              widget.taskResponse!.reference,
-                              widget.formField!.reference,
+                              widget.field!.id,
+                              widget.response!.id,
                             );
                             _shouldSetState = true;
-                            if (_model.formResponseImage?.reference != null) {
-                              await _model.formResponse!.reference
-                                  .update(createResponseFieldsRecordData(
-                                answer: _model.uploadedFileUrl,
-                              ));
+                            if (_model.responseField != null) {
+                              await ResponseFieldsTable().update(
+                                data: {
+                                  'answer': _model.uploadedFileUrl,
+                                },
+                                matchingRows: (rows) => rows.eq(
+                                  'id',
+                                  _model.responseField?.id,
+                                ),
+                              );
                               if (_shouldSetState) setState(() {});
                               return;
                             } else {
-                              await ResponseFieldsRecord.createDoc(
-                                      widget.taskResponse!.reference)
-                                  .set(createResponseFieldsRecordData(
-                                formField: widget.formField?.reference,
-                                question: widget.formField?.question,
-                                answer: _model.uploadedFileUrl,
-                              ));
+                              await ResponseFieldsTable().insert({
+                                'field_id': widget.field?.id,
+                                'response_id': widget.response?.id,
+                                'answer': _model.uploadedFileUrl,
+                              });
                               if (_shouldSetState) setState(() {});
                               return;
                             }

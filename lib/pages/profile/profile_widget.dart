@@ -1,4 +1,4 @@
-import '/auth/firebase_auth/auth_util.dart';
+import '/auth/supabase_auth/auth_util.dart';
 import '/flutter_flow/flutter_flow_animations.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -83,6 +83,8 @@ class _ProfileWidgetState extends State<ProfileWidget>
       );
     }
 
+    context.watch<FFAppState>();
+
     return GestureDetector(
       onTap: () => _model.unfocusNode.canRequestFocus
           ? FocusScope.of(context).requestFocus(_model.unfocusNode)
@@ -154,17 +156,15 @@ class _ProfileWidgetState extends State<ProfileWidget>
             ),
             Padding(
               padding: EdgeInsetsDirectional.fromSTEB(24.0, 0.0, 0.0, 0.0),
-              child: AuthUserStreamWidget(
-                builder: (context) => Text(
-                  currentUserDisplayName,
-                  style: FlutterFlowTheme.of(context).headlineLarge,
-                ),
+              child: Text(
+                FFAppState().authUser.name,
+                style: FlutterFlowTheme.of(context).headlineLarge,
               ),
             ),
             Padding(
               padding: EdgeInsetsDirectional.fromSTEB(24.0, 4.0, 0.0, 16.0),
               child: Text(
-                currentUserEmail,
+                FFAppState().authUser.email,
                 style: FlutterFlowTheme.of(context).labelMedium,
               ),
             ),

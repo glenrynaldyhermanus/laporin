@@ -1,12 +1,12 @@
-import '/auth/firebase_auth/auth_util.dart';
-import '/backend/backend.dart';
+import '/auth/supabase_auth/auth_util.dart';
+import '/backend/schema/structs/index.dart';
+import '/backend/supabase/supabase.dart';
 import '/flutter_flow/flutter_flow_animations.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/custom_code/actions/index.dart' as actions;
 import '/flutter_flow/custom_functions.dart' as functions;
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -219,7 +219,20 @@ class _HomeWidgetState extends State<HomeWidget> with TickerProviderStateMixin {
 
     // On page load action.
     SchedulerBinding.instance.addPostFrameCallback((_) async {
-      if (currentUserDisplayName == null || currentUserDisplayName == '') {
+      _model.user = await actions.getUserByUuid(
+        currentUserUid,
+      );
+      setState(() {
+        FFAppState().authUser = UserStruct(
+          id: _model.user?.id,
+          uuid: currentUserUid,
+          name: _model.user?.name,
+          email: _model.user?.email,
+          gender: _model.user?.gender,
+          birthdate: _model.user?.birthdate,
+        );
+      });
+      if (_model.user?.gender == null || _model.user?.gender == '') {
         context.goNamed('EditProfile');
 
         return;
@@ -255,6 +268,8 @@ class _HomeWidgetState extends State<HomeWidget> with TickerProviderStateMixin {
         ),
       );
     }
+
+    context.watch<FFAppState>();
 
     return GestureDetector(
       onTap: () => _model.unfocusNode.canRequestFocus
@@ -296,66 +311,101 @@ class _HomeWidgetState extends State<HomeWidget> with TickerProviderStateMixin {
                     Padding(
                       padding:
                           EdgeInsetsDirectional.fromSTEB(0.0, 16.0, 0.0, 0.0),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          Expanded(
-                            child: StreamBuilder<List<AttendanceRecord>>(
-                              stream: queryAttendanceRecord(
-                                parent: currentUserReference,
-                                queryBuilder: (attendanceRecord) =>
-                                    attendanceRecord
-                                        .where(
-                                          'clocked_in',
-                                          isGreaterThanOrEqualTo:
-                                              functions.startingDate(
-                                                  getCurrentTimestamp),
-                                        )
-                                        .where(
-                                          'clocked_in',
-                                          isLessThanOrEqualTo: functions
-                                              .endingDate(getCurrentTimestamp),
-                                        ),
-                                singleRecord: true,
+                      child: FutureBuilder<List<UserAttendancesRow>>(
+                        future: UserAttendancesTable().querySingleRow(
+                          queryFn: (q) => q
+                              .eq(
+                                'user_id',
+                                FFAppState().authUser.id,
+                              )
+                              .gte(
+                                'clocked_in_at',
+                                supaSerialize<DateTime>(functions
+                                    .startingDate(getCurrentTimestamp)),
+                              )
+                              .lte(
+                                'clocked_in_at',
+                                supaSerialize<DateTime>(
+                                    functions.endingDate(getCurrentTimestamp)),
                               ),
-                              builder: (context, snapshot) {
-                                // Customize what your widget looks like when it's loading.
-                                if (!snapshot.hasData) {
-                                  return Center(
-                                    child: SizedBox(
-                                      width: 50.0,
-                                      height: 50.0,
-                                      child: SpinKitFoldingCube(
-                                        color: FlutterFlowTheme.of(context)
-                                            .primary,
-                                        size: 50.0,
-                                      ),
-                                    ),
-                                  );
-                                }
-                                List<AttendanceRecord>
-                                    containerAttendanceRecordList =
-                                    snapshot.data!;
-                                final containerAttendanceRecord =
-                                    containerAttendanceRecordList.isNotEmpty
-                                        ? containerAttendanceRecordList.first
-                                        : null;
-                                return InkWell(
+                        ),
+                        builder: (context, snapshot) {
+                          // Customize what your widget looks like when it's loading.
+                          if (!snapshot.hasData) {
+                            return Center(
+                              child: SizedBox(
+                                width: 50.0,
+                                height: 50.0,
+                                child: SpinKitFoldingCube(
+                                  color: FlutterFlowTheme.of(context).primary,
+                                  size: 50.0,
+                                ),
+                              ),
+                            );
+                          }
+                          List<UserAttendancesRow> rowUserAttendancesRowList =
+                              snapshot.data!;
+                          final rowUserAttendancesRow =
+                              rowUserAttendancesRowList.isNotEmpty
+                                  ? rowUserAttendancesRowList.first
+                                  : null;
+                          return Row(
+                            mainAxisSize: MainAxisSize.max,
+                            children: [
+                              Expanded(
+                                child: InkWell(
                                   splashColor: Colors.transparent,
                                   focusColor: Colors.transparent,
                                   hoverColor: Colors.transparent,
                                   highlightColor: Colors.transparent,
                                   onTap: () async {
-                                    if (containerAttendanceRecord != null) {
+                                    if (rowUserAttendancesRow != null) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            'Trueee',
+                                            style: TextStyle(
+                                              color:
+                                                  FlutterFlowTheme.of(context)
+                                                      .primaryText,
+                                            ),
+                                          ),
+                                          duration:
+                                              Duration(milliseconds: 4000),
+                                          backgroundColor:
+                                              FlutterFlowTheme.of(context)
+                                                  .secondary,
+                                        ),
+                                      );
+                                      return;
+                                    } else {
+                                      await UserAttendancesTable().insert({
+                                        'user_id': FFAppState().authUser.id,
+                                        'clocked_in_at':
+                                            supaSerialize<DateTime>(
+                                                getCurrentTimestamp),
+                                      });
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            'False',
+                                            style: TextStyle(
+                                              color:
+                                                  FlutterFlowTheme.of(context)
+                                                      .primaryText,
+                                            ),
+                                          ),
+                                          duration:
+                                              Duration(milliseconds: 4000),
+                                          backgroundColor:
+                                              FlutterFlowTheme.of(context)
+                                                  .secondary,
+                                        ),
+                                      );
                                       return;
                                     }
-
-                                    await AttendanceRecord.createDoc(
-                                            currentUserReference!)
-                                        .set(createAttendanceRecordData(
-                                      clockedIn: getCurrentTimestamp,
-                                    ));
-                                    return;
                                   },
                                   child: Container(
                                     height: 80.0,
@@ -404,13 +454,13 @@ class _HomeWidgetState extends State<HomeWidget> with TickerProviderStateMixin {
                                                             .fromSTEB(0.0, 8.0,
                                                                 0.0, 0.0),
                                                     child: Text(
-                                                      containerAttendanceRecord !=
+                                                      rowUserAttendancesRow !=
                                                               null
                                                           ? dateTimeFormat(
                                                               'd/M H:mm',
-                                                              containerAttendanceRecord!
-                                                                  .clockedIn!)
-                                                          : 'Tap to clock In',
+                                                              rowUserAttendancesRow!
+                                                                  .clockedInAt!)
+                                                          : 'Tap to clock in',
                                                       style:
                                                           FlutterFlowTheme.of(
                                                                   context)
@@ -428,62 +478,24 @@ class _HomeWidgetState extends State<HomeWidget> with TickerProviderStateMixin {
                                     ),
                                   ),
                                 ).animateOnPageLoad(animationsMap[
-                                    'containerOnPageLoadAnimation1']!);
-                              },
-                            ),
-                          ),
-                          Expanded(
-                            child: StreamBuilder<List<AttendanceRecord>>(
-                              stream: queryAttendanceRecord(
-                                parent: currentUserReference,
-                                queryBuilder: (attendanceRecord) =>
-                                    attendanceRecord
-                                        .where(
-                                          'clocked_in',
-                                          isGreaterThanOrEqualTo:
-                                              functions.startingDate(
-                                                  getCurrentTimestamp),
-                                        )
-                                        .where(
-                                          'clocked_in',
-                                          isLessThanOrEqualTo: functions
-                                              .endingDate(getCurrentTimestamp),
-                                        ),
-                                singleRecord: true,
+                                    'containerOnPageLoadAnimation1']!),
                               ),
-                              builder: (context, snapshot) {
-                                // Customize what your widget looks like when it's loading.
-                                if (!snapshot.hasData) {
-                                  return Center(
-                                    child: SizedBox(
-                                      width: 50.0,
-                                      height: 50.0,
-                                      child: SpinKitFoldingCube(
-                                        color: FlutterFlowTheme.of(context)
-                                            .primary,
-                                        size: 50.0,
-                                      ),
-                                    ),
-                                  );
-                                }
-                                List<AttendanceRecord>
-                                    containerAttendanceRecordList =
-                                    snapshot.data!;
-                                final containerAttendanceRecord =
-                                    containerAttendanceRecordList.isNotEmpty
-                                        ? containerAttendanceRecordList.first
-                                        : null;
-                                return InkWell(
+                              Expanded(
+                                child: InkWell(
                                   splashColor: Colors.transparent,
                                   focusColor: Colors.transparent,
                                   hoverColor: Colors.transparent,
                                   highlightColor: Colors.transparent,
                                   onTap: () async {
-                                    if (containerAttendanceRecord != null) {
-                                      await containerAttendanceRecord!.reference
-                                          .update(createAttendanceRecordData(
-                                        clockedOut: getCurrentTimestamp,
-                                      ));
+                                    if (rowUserAttendancesRow != null) {
+                                      await UserAttendancesTable().update(
+                                        data: {
+                                          'clocked_out_at':
+                                              supaSerialize<DateTime>(
+                                                  getCurrentTimestamp),
+                                        },
+                                        matchingRows: (rows) => rows,
+                                      );
                                       return;
                                     } else {
                                       return;
@@ -536,15 +548,12 @@ class _HomeWidgetState extends State<HomeWidget> with TickerProviderStateMixin {
                                                             .fromSTEB(0.0, 8.0,
                                                                 0.0, 0.0),
                                                     child: Text(
-                                                      (containerAttendanceRecord !=
-                                                                  null) &&
-                                                              (containerAttendanceRecord
-                                                                      ?.clockedOut !=
-                                                                  null)
+                                                      rowUserAttendancesRow !=
+                                                              null
                                                           ? dateTimeFormat(
                                                               'd/M H:mm',
-                                                              containerAttendanceRecord!
-                                                                  .clockedOut!)
+                                                              rowUserAttendancesRow!
+                                                                  .clockedOutAt!)
                                                           : 'Tap to clock out',
                                                       style:
                                                           FlutterFlowTheme.of(
@@ -563,13 +572,13 @@ class _HomeWidgetState extends State<HomeWidget> with TickerProviderStateMixin {
                                     ),
                                   ),
                                 ).animateOnPageLoad(animationsMap[
-                                    'containerOnPageLoadAnimation2']!);
-                              },
-                            ),
-                          ),
-                        ]
-                            .divide(SizedBox(width: 16.0))
-                            .around(SizedBox(width: 16.0)),
+                                    'containerOnPageLoadAnimation2']!),
+                              ),
+                            ]
+                                .divide(SizedBox(width: 16.0))
+                                .around(SizedBox(width: 16.0)),
+                          );
+                        },
                       ),
                     ),
                   ],
@@ -589,18 +598,14 @@ class _HomeWidgetState extends State<HomeWidget> with TickerProviderStateMixin {
                   ).animateOnPageLoad(
                       animationsMap['textOnPageLoadAnimation5']!),
                 ),
-                StreamBuilder<List<TasksRecord>>(
-                  stream: queryTasksRecord(
-                    queryBuilder: (tasksRecord) => tasksRecord
-                        .where(
-                          'assignees',
-                          arrayContains: currentUserReference,
+                FutureBuilder<List<TaskAssigneesRow>>(
+                  future: TaskAssigneesTable().queryRows(
+                    queryFn: (q) => q
+                        .eq(
+                          'user_id',
+                          FFAppState().authUser.id,
                         )
-                        .where(
-                          'status',
-                          isEqualTo: 'Assigned',
-                        )
-                        .orderBy('due'),
+                        .order('created_at', ascending: true),
                   ),
                   builder: (context, snapshot) {
                     // Customize what your widget looks like when it's loading.
@@ -616,184 +621,242 @@ class _HomeWidgetState extends State<HomeWidget> with TickerProviderStateMixin {
                         ),
                       );
                     }
-                    List<TasksRecord> columnTasksRecordList = snapshot.data!;
+                    List<TaskAssigneesRow> columnTaskAssigneesRowList =
+                        snapshot.data!;
                     return Column(
                       mainAxisSize: MainAxisSize.max,
-                      children: List.generate(columnTasksRecordList.length,
+                      children: List.generate(columnTaskAssigneesRowList.length,
                           (columnIndex) {
-                        final columnTasksRecord =
-                            columnTasksRecordList[columnIndex];
-                        return Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
-                              16.0, 12.0, 16.0, 0.0),
-                          child: InkWell(
-                            splashColor: Colors.transparent,
-                            focusColor: Colors.transparent,
-                            hoverColor: Colors.transparent,
-                            highlightColor: Colors.transparent,
-                            onTap: () async {
-                              var _shouldSetState = false;
-                              _model.taskResponse =
-                                  await actions.getTaskResponse(
-                                currentUserReference!,
-                                columnTasksRecord.reference,
+                        final columnTaskAssigneesRow =
+                            columnTaskAssigneesRowList[columnIndex];
+                        return FutureBuilder<List<TasksRow>>(
+                          future: TasksTable().querySingleRow(
+                            queryFn: (q) => q.eq(
+                              'id',
+                              columnTaskAssigneesRow.taskId,
+                            ),
+                          ),
+                          builder: (context, snapshot) {
+                            // Customize what your widget looks like when it's loading.
+                            if (!snapshot.hasData) {
+                              return Center(
+                                child: SizedBox(
+                                  width: 50.0,
+                                  height: 50.0,
+                                  child: SpinKitFoldingCube(
+                                    color: FlutterFlowTheme.of(context).primary,
+                                    size: 50.0,
+                                  ),
+                                ),
                               );
-                              _shouldSetState = true;
-                              if (_model.taskResponse != null) {
-                                await _model.taskResponse!
-                                    .update(createTaskResponsesRecordData(
-                                  resumeAt: getCurrentTimestamp,
-                                ));
-
-                                context.pushNamed(
-                                  'TaskForm',
-                                  queryParameters: {
-                                    'task': serializeParam(
-                                      columnTasksRecord.reference,
-                                      ParamType.DocumentReference,
-                                    ),
-                                  }.withoutNulls,
-                                );
-
-                                if (_shouldSetState) setState(() {});
-                                return;
-                              } else {
-                                var taskResponsesRecordReference =
-                                    TaskResponsesRecord.collection.doc();
-                                await taskResponsesRecordReference
-                                    .set(createTaskResponsesRecordData(
-                                  user: currentUserReference,
-                                  task: columnTasksRecord.reference,
-                                  form: columnTasksRecord.form,
-                                  startAt: getCurrentTimestamp,
-                                ));
-                                _model.newTaskResponse =
-                                    TaskResponsesRecord.getDocumentFromData(
-                                        createTaskResponsesRecordData(
-                                          user: currentUserReference,
-                                          task: columnTasksRecord.reference,
-                                          form: columnTasksRecord.form,
-                                          startAt: getCurrentTimestamp,
-                                        ),
-                                        taskResponsesRecordReference);
-                                _shouldSetState = true;
-
-                                context.pushNamed(
-                                  'TaskForm',
-                                  queryParameters: {
-                                    'task': serializeParam(
-                                      columnTasksRecord.reference,
-                                      ParamType.DocumentReference,
-                                    ),
-                                  }.withoutNulls,
-                                );
-
-                                if (_shouldSetState) setState(() {});
-                                return;
-                              }
-
-                              if (_shouldSetState) setState(() {});
-                            },
-                            child: Container(
+                            }
+                            List<TasksRow> containerTasksRowList =
+                                snapshot.data!;
+                            final containerTasksRow =
+                                containerTasksRowList.isNotEmpty
+                                    ? containerTasksRowList.first
+                                    : null;
+                            return Container(
                               width: double.infinity,
                               decoration: BoxDecoration(
-                                color: Colors.white,
-                                boxShadow: [
-                                  BoxShadow(
-                                    blurRadius: 4.0,
-                                    color: Color(0x1F000000),
-                                    offset: Offset(0.0, 2.0),
-                                  )
-                                ],
-                                borderRadius: BorderRadius.circular(8.0),
-                                border: Border.all(
-                                  color: Color(0xFFF1F4F8),
-                                  width: 1.0,
-                                ),
+                                color: FlutterFlowTheme.of(context)
+                                    .secondaryBackground,
                               ),
-                              child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
-                                    16.0, 16.0, 16.0, 16.0),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.max,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Container(
-                                      width: 36.0,
-                                      height: 36.0,
+                              child: Visibility(
+                                visible: containerTasksRow?.status == 1,
+                                child: Padding(
+                                  padding: EdgeInsetsDirectional.fromSTEB(
+                                      16.0, 12.0, 16.0, 0.0),
+                                  child: InkWell(
+                                    splashColor: Colors.transparent,
+                                    focusColor: Colors.transparent,
+                                    hoverColor: Colors.transparent,
+                                    highlightColor: Colors.transparent,
+                                    onTap: () async {
+                                      var _shouldSetState = false;
+                                      _model.response =
+                                          await actions.getResponseByUserTask(
+                                        FFAppState().authUser.id,
+                                        containerTasksRow!.id,
+                                      );
+                                      _shouldSetState = true;
+                                      if (_model.response != null) {
+                                        await ResponsesTable().update(
+                                          data: {
+                                            'resume_at':
+                                                supaSerialize<DateTime>(
+                                                    getCurrentTimestamp),
+                                          },
+                                          matchingRows: (rows) => rows.eq(
+                                            'id',
+                                            _model.response?.id,
+                                          ),
+                                        );
+
+                                        context.pushNamed(
+                                          'TaskForm',
+                                          queryParameters: {
+                                            'task': serializeParam(
+                                              containerTasksRow,
+                                              ParamType.SupabaseRow,
+                                            ),
+                                            'response': serializeParam(
+                                              _model.response,
+                                              ParamType.SupabaseRow,
+                                            ),
+                                          }.withoutNulls,
+                                        );
+
+                                        if (_shouldSetState) setState(() {});
+                                        return;
+                                      } else {
+                                        _model.newResponse =
+                                            await ResponsesTable().insert({
+                                          'task_id': containerTasksRow?.id,
+                                          'user_id': FFAppState().authUser.id,
+                                          'start_at': supaSerialize<DateTime>(
+                                              getCurrentTimestamp),
+                                        });
+                                        _shouldSetState = true;
+
+                                        context.pushNamed(
+                                          'TaskForm',
+                                          queryParameters: {
+                                            'task': serializeParam(
+                                              containerTasksRow,
+                                              ParamType.SupabaseRow,
+                                            ),
+                                            'response': serializeParam(
+                                              _model.newResponse,
+                                              ParamType.SupabaseRow,
+                                            ),
+                                          }.withoutNulls,
+                                        );
+
+                                        if (_shouldSetState) setState(() {});
+                                        return;
+                                      }
+
+                                      if (_shouldSetState) setState(() {});
+                                    },
+                                    child: Container(
+                                      width: double.infinity,
                                       decoration: BoxDecoration(
-                                        color: Color(0x3371C1F9),
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: Icon(
-                                        Icons.propane_tank_outlined,
-                                        color: FlutterFlowTheme.of(context)
-                                            .primary,
-                                        size: 24.0,
-                                      ),
-                                    ),
-                                    Column(
-                                      mainAxisSize: MainAxisSize.max,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          columnTasksRecord.name,
-                                          style: FlutterFlowTheme.of(context)
-                                              .bodyMedium,
+                                        color: Colors.white,
+                                        boxShadow: [
+                                          BoxShadow(
+                                            blurRadius: 4.0,
+                                            color: Color(0x1F000000),
+                                            offset: Offset(0.0, 2.0),
+                                          )
+                                        ],
+                                        borderRadius:
+                                            BorderRadius.circular(8.0),
+                                        border: Border.all(
+                                          color: Color(0xFFF1F4F8),
+                                          width: 1.0,
                                         ),
-                                        Column(
+                                      ),
+                                      child: Padding(
+                                        padding: EdgeInsetsDirectional.fromSTEB(
+                                            16.0, 16.0, 16.0, 16.0),
+                                        child: Row(
                                           mainAxisSize: MainAxisSize.max,
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
                                           children: [
-                                            Row(
+                                            Container(
+                                              width: 36.0,
+                                              height: 36.0,
+                                              decoration: BoxDecoration(
+                                                color: Color(0x3371C1F9),
+                                                shape: BoxShape.circle,
+                                              ),
+                                              child: Icon(
+                                                Icons.propane_tank_outlined,
+                                                color:
+                                                    FlutterFlowTheme.of(context)
+                                                        .primary,
+                                                size: 24.0,
+                                              ),
+                                            ),
+                                            Column(
                                               mainAxisSize: MainAxisSize.max,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
                                               children: [
-                                                Icon(
-                                                  Icons.location_on_rounded,
-                                                  color: FlutterFlowTheme.of(
-                                                          context)
-                                                      .secondaryText,
-                                                  size: 16.0,
-                                                ),
                                                 Text(
-                                                  columnTasksRecord.location,
+                                                  containerTasksRow!.name,
                                                   style: FlutterFlowTheme.of(
                                                           context)
                                                       .bodyMedium,
                                                 ),
-                                              ].divide(SizedBox(width: 8.0)),
-                                            ),
-                                            Row(
-                                              mainAxisSize: MainAxisSize.max,
-                                              children: [
-                                                Icon(
-                                                  Icons.access_time_sharp,
-                                                  color: FlutterFlowTheme.of(
-                                                          context)
-                                                      .secondaryText,
-                                                  size: 16.0,
+                                                Column(
+                                                  mainAxisSize:
+                                                      MainAxisSize.max,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Row(
+                                                      mainAxisSize:
+                                                          MainAxisSize.max,
+                                                      children: [
+                                                        Icon(
+                                                          Icons
+                                                              .location_on_rounded,
+                                                          color: FlutterFlowTheme
+                                                                  .of(context)
+                                                              .secondaryText,
+                                                          size: 16.0,
+                                                        ),
+                                                        Text(
+                                                          containerTasksRow!
+                                                              .location!,
+                                                          style: FlutterFlowTheme
+                                                                  .of(context)
+                                                              .bodyMedium,
+                                                        ),
+                                                      ].divide(
+                                                          SizedBox(width: 8.0)),
+                                                    ),
+                                                    Row(
+                                                      mainAxisSize:
+                                                          MainAxisSize.max,
+                                                      children: [
+                                                        Icon(
+                                                          Icons
+                                                              .access_time_sharp,
+                                                          color: FlutterFlowTheme
+                                                                  .of(context)
+                                                              .secondaryText,
+                                                          size: 16.0,
+                                                        ),
+                                                        Text(
+                                                          dateTimeFormat(
+                                                              'yMMMd',
+                                                              containerTasksRow!
+                                                                  .dueAt!),
+                                                          style: FlutterFlowTheme
+                                                                  .of(context)
+                                                              .bodyMedium,
+                                                        ),
+                                                      ].divide(
+                                                          SizedBox(width: 8.0)),
+                                                    ),
+                                                  ],
                                                 ),
-                                                Text(
-                                                  dateTimeFormat('yMMMd',
-                                                      columnTasksRecord.due!),
-                                                  style: FlutterFlowTheme.of(
-                                                          context)
-                                                      .bodyMedium,
-                                                ),
-                                              ].divide(SizedBox(width: 8.0)),
+                                              ].divide(SizedBox(height: 8.0)),
                                             ),
-                                          ],
+                                          ].divide(SizedBox(width: 16.0)),
                                         ),
-                                      ].divide(SizedBox(height: 8.0)),
+                                      ),
                                     ),
-                                  ].divide(SizedBox(width: 16.0)),
+                                  ).animateOnPageLoad(animationsMap[
+                                      'containerOnPageLoadAnimation3']!),
                                 ),
                               ),
-                            ),
-                          ).animateOnPageLoad(
-                              animationsMap['containerOnPageLoadAnimation3']!),
+                            );
+                          },
                         );
                       }),
                     );

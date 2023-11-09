@@ -1,5 +1,6 @@
-import '/auth/firebase_auth/auth_util.dart';
-import '/backend/backend.dart';
+import '/auth/supabase_auth/auth_util.dart';
+import '/backend/schema/structs/index.dart';
+import '/backend/supabase/supabase.dart';
 import '/flutter_flow/flutter_flow_animations.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -7,7 +8,6 @@ import '/flutter_flow/flutter_flow_widgets.dart';
 import '/custom_code/actions/index.dart' as actions;
 import '/flutter_flow/custom_functions.dart' as functions;
 import 'home_widget.dart' show HomeWidget;
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -20,10 +20,12 @@ class HomeModel extends FlutterFlowModel<HomeWidget> {
   ///  State fields for stateful widgets in this page.
 
   final unfocusNode = FocusNode();
-  // Stores action output result for [Custom Action - getTaskResponse] action in Container widget.
-  DocumentReference? taskResponse;
-  // Stores action output result for [Backend Call - Create Document] action in Container widget.
-  TaskResponsesRecord? newTaskResponse;
+  // Stores action output result for [Custom Action - getUserByUuid] action in Home widget.
+  UsersRow? user;
+  // Stores action output result for [Custom Action - getResponseByUserTask] action in Container widget.
+  ResponsesRow? response;
+  // Stores action output result for [Backend Call - Insert Row] action in Container widget.
+  ResponsesRow? newResponse;
 
   /// Initialization and disposal methods.
 
