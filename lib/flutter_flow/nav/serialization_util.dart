@@ -221,6 +221,8 @@ dynamic deserializeParam<T>(
             return FormsRow(data);
           case BusinessesRow:
             return BusinessesRow(data);
+          case FieldOptionsRow:
+            return FieldOptionsRow(data);
           case ResponseFieldsRow:
             return ResponseFieldsRow(data);
           case PagesRow:

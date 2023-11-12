@@ -102,6 +102,8 @@ class _EditProfileWidgetState extends State<EditProfileWidget> {
                         context: context,
                         storageFolderPath:
                             'profile_pictures/${FFAppState().authUser.uuid}/',
+                        maxWidth: 100.00,
+                        maxHeight: 100.00,
                         imageQuality: 80,
                         allowPhoto: true,
                         backgroundColor:

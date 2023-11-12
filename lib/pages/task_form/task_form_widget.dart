@@ -152,25 +152,22 @@ class _TaskFormWidgetState extends State<TaskFormWidget> {
                               ),
                             );
                           }
-                          List<FieldsRow> columnFieldsRowList = snapshot.data!;
-                          return SingleChildScrollView(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.max,
-                              children:
-                                  List.generate(columnFieldsRowList.length,
-                                          (columnIndex) {
-                                final columnFieldsRow =
-                                    columnFieldsRowList[columnIndex];
-                                return DynamicFieldWidget(
-                                  key: Key(
-                                      'Key0yv_${columnIndex}_of_${columnFieldsRowList.length}'),
-                                  field: columnFieldsRow,
-                                  response: widget.response!,
-                                );
-                              })
-                                      .divide(SizedBox(height: 16.0))
-                                      .around(SizedBox(height: 16.0)),
-                            ),
+                          List<FieldsRow> listViewFieldsRowList =
+                              snapshot.data!;
+                          return ListView.builder(
+                            padding: EdgeInsets.zero,
+                            scrollDirection: Axis.vertical,
+                            itemCount: listViewFieldsRowList.length,
+                            itemBuilder: (context, listViewIndex) {
+                              final listViewFieldsRow =
+                                  listViewFieldsRowList[listViewIndex];
+                              return DynamicFieldWidget(
+                                key: Key(
+                                    'Key0yv_${listViewIndex}_of_${listViewFieldsRowList.length}'),
+                                field: listViewFieldsRow,
+                                response: widget.response!,
+                              );
+                            },
                           );
                         },
                       ),

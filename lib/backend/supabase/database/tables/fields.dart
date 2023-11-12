@@ -31,4 +31,7 @@ class FieldsRow extends SupabaseDataRow {
 
   int get formId => getField<int>('form_id')!;
   set formId(int value) => setField<int>('form_id', value);
+
+  String get uuid => getField<String>('uuid')!;
+  set uuid(String value) => setField<String>('uuid', value);
 }

@@ -237,6 +237,10 @@ class _HomeWidgetState extends State<HomeWidget> with TickerProviderStateMixin {
 
         return;
       } else {
+        await actions.supabaseRealtimeSetup(
+          'tasks',
+          () async {},
+        );
         return;
       }
     });
@@ -294,312 +298,268 @@ class _HomeWidgetState extends State<HomeWidget> with TickerProviderStateMixin {
         ),
         body: SafeArea(
           top: true,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Stack(
-                  children: [
-                    Container(
-                      width: double.infinity,
-                      height: 64.0,
-                      decoration: BoxDecoration(
-                        color: FlutterFlowTheme.of(context).primary,
-                      ),
+          child: Column(
+            mainAxisSize: MainAxisSize.max,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Stack(
+                children: [
+                  Container(
+                    width: double.infinity,
+                    height: 64.0,
+                    decoration: BoxDecoration(
+                      color: FlutterFlowTheme.of(context).primary,
                     ),
-                    Padding(
-                      padding:
-                          EdgeInsetsDirectional.fromSTEB(0.0, 16.0, 0.0, 0.0),
-                      child: FutureBuilder<List<UserAttendancesRow>>(
-                        future: UserAttendancesTable().querySingleRow(
-                          queryFn: (q) => q
-                              .eq(
-                                'user_id',
-                                FFAppState().authUser.id,
-                              )
-                              .gte(
-                                'clocked_in_at',
-                                supaSerialize<DateTime>(functions
-                                    .startingDate(getCurrentTimestamp)),
-                              )
-                              .lte(
-                                'clocked_in_at',
-                                supaSerialize<DateTime>(
-                                    functions.endingDate(getCurrentTimestamp)),
+                  ),
+                  Padding(
+                    padding:
+                        EdgeInsetsDirectional.fromSTEB(0.0, 16.0, 0.0, 0.0),
+                    child: FutureBuilder<List<UserAttendancesRow>>(
+                      future: UserAttendancesTable().querySingleRow(
+                        queryFn: (q) => q
+                            .eq(
+                              'user_id',
+                              FFAppState().authUser.id,
+                            )
+                            .gte(
+                              'clocked_in_at',
+                              supaSerialize<DateTime>(
+                                  functions.startingDate(getCurrentTimestamp)),
+                            )
+                            .lte(
+                              'clocked_in_at',
+                              supaSerialize<DateTime>(
+                                  functions.endingDate(getCurrentTimestamp)),
+                            ),
+                      ),
+                      builder: (context, snapshot) {
+                        // Customize what your widget looks like when it's loading.
+                        if (!snapshot.hasData) {
+                          return Center(
+                            child: SizedBox(
+                              width: 50.0,
+                              height: 50.0,
+                              child: SpinKitFoldingCube(
+                                color: FlutterFlowTheme.of(context).primary,
+                                size: 50.0,
                               ),
-                        ),
-                        builder: (context, snapshot) {
-                          // Customize what your widget looks like when it's loading.
-                          if (!snapshot.hasData) {
-                            return Center(
-                              child: SizedBox(
-                                width: 50.0,
-                                height: 50.0,
-                                child: SpinKitFoldingCube(
-                                  color: FlutterFlowTheme.of(context).primary,
-                                  size: 50.0,
-                                ),
-                              ),
-                            );
-                          }
-                          List<UserAttendancesRow> rowUserAttendancesRowList =
-                              snapshot.data!;
-                          final rowUserAttendancesRow =
-                              rowUserAttendancesRowList.isNotEmpty
-                                  ? rowUserAttendancesRowList.first
-                                  : null;
-                          return Row(
-                            mainAxisSize: MainAxisSize.max,
-                            children: [
-                              Expanded(
-                                child: InkWell(
-                                  splashColor: Colors.transparent,
-                                  focusColor: Colors.transparent,
-                                  hoverColor: Colors.transparent,
-                                  highlightColor: Colors.transparent,
-                                  onTap: () async {
-                                    if (rowUserAttendancesRow != null) {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                            'Trueee',
-                                            style: TextStyle(
-                                              color:
-                                                  FlutterFlowTheme.of(context)
-                                                      .primaryText,
-                                            ),
-                                          ),
-                                          duration:
-                                              Duration(milliseconds: 4000),
-                                          backgroundColor:
-                                              FlutterFlowTheme.of(context)
-                                                  .secondary,
-                                        ),
-                                      );
-                                      return;
-                                    } else {
-                                      await UserAttendancesTable().insert({
-                                        'user_id': FFAppState().authUser.id,
-                                        'clocked_in_at':
-                                            supaSerialize<DateTime>(
-                                                getCurrentTimestamp),
-                                      });
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                            'False',
-                                            style: TextStyle(
-                                              color:
-                                                  FlutterFlowTheme.of(context)
-                                                      .primaryText,
-                                            ),
-                                          ),
-                                          duration:
-                                              Duration(milliseconds: 4000),
-                                          backgroundColor:
-                                              FlutterFlowTheme.of(context)
-                                                  .secondary,
-                                        ),
-                                      );
-                                      return;
-                                    }
-                                  },
-                                  child: Container(
-                                    height: 80.0,
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      boxShadow: [
-                                        BoxShadow(
-                                          blurRadius: 4.0,
-                                          color: Color(0x1F000000),
-                                          offset: Offset(0.0, 2.0),
-                                        )
-                                      ],
-                                      borderRadius: BorderRadius.circular(8.0),
-                                      border: Border.all(
-                                        color: Color(0xFFF1F4F8),
-                                        width: 1.0,
-                                      ),
-                                    ),
-                                    child: Padding(
-                                      padding: EdgeInsetsDirectional.fromSTEB(
-                                          12.0, 0.0, 12.0, 0.0),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.max,
-                                        children: [
-                                          Expanded(
-                                            child: Padding(
-                                              padding: EdgeInsetsDirectional
-                                                  .fromSTEB(8.0, 8.0, 8.0, 8.0),
-                                              child: Column(
-                                                mainAxisSize: MainAxisSize.max,
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    'Clock In',
-                                                    style: FlutterFlowTheme.of(
-                                                            context)
-                                                        .bodyLarge,
-                                                  ).animateOnPageLoad(animationsMap[
-                                                      'textOnPageLoadAnimation1']!),
-                                                  Padding(
-                                                    padding:
-                                                        EdgeInsetsDirectional
-                                                            .fromSTEB(0.0, 8.0,
-                                                                0.0, 0.0),
-                                                    child: Text(
-                                                      rowUserAttendancesRow !=
-                                                              null
-                                                          ? dateTimeFormat(
-                                                              'd/M H:mm',
-                                                              rowUserAttendancesRow!
-                                                                  .clockedInAt!)
-                                                          : 'Tap to clock in',
-                                                      style:
-                                                          FlutterFlowTheme.of(
-                                                                  context)
-                                                              .labelMedium,
-                                                    ).animateOnPageLoad(
-                                                        animationsMap[
-                                                            'textOnPageLoadAnimation2']!),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ).animateOnPageLoad(animationsMap[
-                                    'containerOnPageLoadAnimation1']!),
-                              ),
-                              Expanded(
-                                child: InkWell(
-                                  splashColor: Colors.transparent,
-                                  focusColor: Colors.transparent,
-                                  hoverColor: Colors.transparent,
-                                  highlightColor: Colors.transparent,
-                                  onTap: () async {
-                                    if (rowUserAttendancesRow != null) {
-                                      await UserAttendancesTable().update(
-                                        data: {
-                                          'clocked_out_at':
-                                              supaSerialize<DateTime>(
-                                                  getCurrentTimestamp),
-                                        },
-                                        matchingRows: (rows) => rows,
-                                      );
-                                      return;
-                                    } else {
-                                      return;
-                                    }
-                                  },
-                                  child: Container(
-                                    height: 80.0,
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      boxShadow: [
-                                        BoxShadow(
-                                          blurRadius: 4.0,
-                                          color: Color(0x1F000000),
-                                          offset: Offset(0.0, 2.0),
-                                        )
-                                      ],
-                                      borderRadius: BorderRadius.circular(8.0),
-                                      border: Border.all(
-                                        color: Color(0xFFF1F4F8),
-                                        width: 1.0,
-                                      ),
-                                    ),
-                                    child: Padding(
-                                      padding: EdgeInsetsDirectional.fromSTEB(
-                                          12.0, 0.0, 12.0, 0.0),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.max,
-                                        children: [
-                                          Expanded(
-                                            child: Padding(
-                                              padding: EdgeInsetsDirectional
-                                                  .fromSTEB(8.0, 8.0, 8.0, 8.0),
-                                              child: Column(
-                                                mainAxisSize: MainAxisSize.max,
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    'Clock Out',
-                                                    style: FlutterFlowTheme.of(
-                                                            context)
-                                                        .bodyLarge,
-                                                  ).animateOnPageLoad(animationsMap[
-                                                      'textOnPageLoadAnimation3']!),
-                                                  Padding(
-                                                    padding:
-                                                        EdgeInsetsDirectional
-                                                            .fromSTEB(0.0, 8.0,
-                                                                0.0, 0.0),
-                                                    child: Text(
-                                                      rowUserAttendancesRow
-                                                                  ?.clockedOutAt !=
-                                                              null
-                                                          ? dateTimeFormat(
-                                                              'd/M H:mm',
-                                                              rowUserAttendancesRow!
-                                                                  .clockedOutAt!)
-                                                          : 'Tap to clock out',
-                                                      style:
-                                                          FlutterFlowTheme.of(
-                                                                  context)
-                                                              .labelMedium,
-                                                    ).animateOnPageLoad(
-                                                        animationsMap[
-                                                            'textOnPageLoadAnimation4']!),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ).animateOnPageLoad(animationsMap[
-                                    'containerOnPageLoadAnimation2']!),
-                              ),
-                            ]
-                                .divide(SizedBox(width: 16.0))
-                                .around(SizedBox(width: 16.0)),
+                            ),
                           );
-                        },
-                      ),
+                        }
+                        List<UserAttendancesRow> rowUserAttendancesRowList =
+                            snapshot.data!;
+                        final rowUserAttendancesRow =
+                            rowUserAttendancesRowList.isNotEmpty
+                                ? rowUserAttendancesRowList.first
+                                : null;
+                        return Row(
+                          mainAxisSize: MainAxisSize.max,
+                          children: [
+                            Expanded(
+                              child: InkWell(
+                                splashColor: Colors.transparent,
+                                focusColor: Colors.transparent,
+                                hoverColor: Colors.transparent,
+                                highlightColor: Colors.transparent,
+                                onTap: () async {
+                                  if (rowUserAttendancesRow != null) {
+                                    return;
+                                  }
+
+                                  context.pushNamed('ClockIn');
+
+                                  return;
+                                },
+                                child: Container(
+                                  height: 80.0,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        blurRadius: 4.0,
+                                        color: Color(0x1F000000),
+                                        offset: Offset(0.0, 2.0),
+                                      )
+                                    ],
+                                    borderRadius: BorderRadius.circular(8.0),
+                                    border: Border.all(
+                                      color: Color(0xFFF1F4F8),
+                                      width: 1.0,
+                                    ),
+                                  ),
+                                  child: Padding(
+                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                        12.0, 0.0, 12.0, 0.0),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.max,
+                                      children: [
+                                        Expanded(
+                                          child: Padding(
+                                            padding:
+                                                EdgeInsetsDirectional.fromSTEB(
+                                                    8.0, 8.0, 8.0, 8.0),
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.max,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  'Clock In',
+                                                  style: FlutterFlowTheme.of(
+                                                          context)
+                                                      .bodyLarge,
+                                                ).animateOnPageLoad(animationsMap[
+                                                    'textOnPageLoadAnimation1']!),
+                                                Padding(
+                                                  padding: EdgeInsetsDirectional
+                                                      .fromSTEB(
+                                                          0.0, 8.0, 0.0, 0.0),
+                                                  child: Text(
+                                                    rowUserAttendancesRow !=
+                                                            null
+                                                        ? dateTimeFormat(
+                                                            'd/M H:mm',
+                                                            rowUserAttendancesRow!
+                                                                .clockedInAt!)
+                                                        : 'Tap to clock in',
+                                                    style: FlutterFlowTheme.of(
+                                                            context)
+                                                        .labelMedium,
+                                                  ).animateOnPageLoad(animationsMap[
+                                                      'textOnPageLoadAnimation2']!),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ).animateOnPageLoad(animationsMap[
+                                  'containerOnPageLoadAnimation1']!),
+                            ),
+                            Expanded(
+                              child: InkWell(
+                                splashColor: Colors.transparent,
+                                focusColor: Colors.transparent,
+                                hoverColor: Colors.transparent,
+                                highlightColor: Colors.transparent,
+                                onTap: () async {
+                                  if (rowUserAttendancesRow != null) {
+                                    context.pushNamed(
+                                      'ClockOut',
+                                      queryParameters: {
+                                        'attendance': serializeParam(
+                                          rowUserAttendancesRow,
+                                          ParamType.SupabaseRow,
+                                        ),
+                                      }.withoutNulls,
+                                    );
+
+                                    return;
+                                  } else {
+                                    return;
+                                  }
+                                },
+                                child: Container(
+                                  height: 80.0,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        blurRadius: 4.0,
+                                        color: Color(0x1F000000),
+                                        offset: Offset(0.0, 2.0),
+                                      )
+                                    ],
+                                    borderRadius: BorderRadius.circular(8.0),
+                                    border: Border.all(
+                                      color: Color(0xFFF1F4F8),
+                                      width: 1.0,
+                                    ),
+                                  ),
+                                  child: Padding(
+                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                        12.0, 0.0, 12.0, 0.0),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.max,
+                                      children: [
+                                        Expanded(
+                                          child: Padding(
+                                            padding:
+                                                EdgeInsetsDirectional.fromSTEB(
+                                                    8.0, 8.0, 8.0, 8.0),
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.max,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  'Clock Out',
+                                                  style: FlutterFlowTheme.of(
+                                                          context)
+                                                      .bodyLarge,
+                                                ).animateOnPageLoad(animationsMap[
+                                                    'textOnPageLoadAnimation3']!),
+                                                Padding(
+                                                  padding: EdgeInsetsDirectional
+                                                      .fromSTEB(
+                                                          0.0, 8.0, 0.0, 0.0),
+                                                  child: Text(
+                                                    rowUserAttendancesRow
+                                                                ?.clockedOutAt !=
+                                                            null
+                                                        ? dateTimeFormat(
+                                                            'd/M H:mm',
+                                                            rowUserAttendancesRow!
+                                                                .clockedOutAt!)
+                                                        : 'Tap to clock out',
+                                                    style: FlutterFlowTheme.of(
+                                                            context)
+                                                        .labelMedium,
+                                                  ).animateOnPageLoad(animationsMap[
+                                                      'textOnPageLoadAnimation4']!),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ).animateOnPageLoad(animationsMap[
+                                  'containerOnPageLoadAnimation2']!),
+                            ),
+                          ]
+                              .divide(SizedBox(width: 16.0))
+                              .around(SizedBox(width: 16.0)),
+                        );
+                      },
                     ),
-                  ],
-                ),
-                Padding(
-                  padding:
-                      EdgeInsetsDirectional.fromSTEB(16.0, 24.0, 16.0, 0.0),
-                  child: Text(
-                    'Tasks',
-                    textAlign: TextAlign.start,
-                    style: FlutterFlowTheme.of(context).titleLarge.override(
-                          fontFamily: 'Outfit',
-                          color: Color(0xFF14181B),
-                          fontSize: 22.0,
-                          fontWeight: FontWeight.w500,
-                        ),
-                  ).animateOnPageLoad(
-                      animationsMap['textOnPageLoadAnimation5']!),
-                ),
-                FutureBuilder<List<TaskAssigneesRow>>(
+                  ),
+                ],
+              ),
+              Padding(
+                padding: EdgeInsetsDirectional.fromSTEB(16.0, 24.0, 16.0, 0.0),
+                child: Text(
+                  'Tasks',
+                  textAlign: TextAlign.start,
+                  style: FlutterFlowTheme.of(context).titleLarge.override(
+                        fontFamily: 'Outfit',
+                        color: Color(0xFF14181B),
+                        fontSize: 22.0,
+                        fontWeight: FontWeight.w500,
+                      ),
+                ).animateOnPageLoad(animationsMap['textOnPageLoadAnimation5']!),
+              ),
+              Expanded(
+                child: FutureBuilder<List<TaskAssigneesRow>>(
                   future: TaskAssigneesTable().queryRows(
                     queryFn: (q) => q
                         .eq(
@@ -622,19 +582,20 @@ class _HomeWidgetState extends State<HomeWidget> with TickerProviderStateMixin {
                         ),
                       );
                     }
-                    List<TaskAssigneesRow> columnTaskAssigneesRowList =
+                    List<TaskAssigneesRow> listViewTaskAssigneesRowList =
                         snapshot.data!;
-                    return Column(
-                      mainAxisSize: MainAxisSize.max,
-                      children: List.generate(columnTaskAssigneesRowList.length,
-                          (columnIndex) {
-                        final columnTaskAssigneesRow =
-                            columnTaskAssigneesRowList[columnIndex];
+                    return ListView.builder(
+                      padding: EdgeInsets.zero,
+                      scrollDirection: Axis.vertical,
+                      itemCount: listViewTaskAssigneesRowList.length,
+                      itemBuilder: (context, listViewIndex) {
+                        final listViewTaskAssigneesRow =
+                            listViewTaskAssigneesRowList[listViewIndex];
                         return FutureBuilder<List<TasksRow>>(
                           future: TasksTable().querySingleRow(
                             queryFn: (q) => q.eq(
                               'id',
-                              columnTaskAssigneesRow.taskId,
+                              listViewTaskAssigneesRow.taskId,
                             ),
                           ),
                           builder: (context, snapshot) {
@@ -859,12 +820,12 @@ class _HomeWidgetState extends State<HomeWidget> with TickerProviderStateMixin {
                             );
                           },
                         );
-                      }),
+                      },
                     );
                   },
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
