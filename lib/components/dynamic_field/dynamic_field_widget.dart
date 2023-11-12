@@ -201,6 +201,8 @@ class _DynamicFieldWidgetState extends State<DynamicFieldWidget> {
                                 await selectMediaWithSourceBottomSheet(
                               context: context,
                               storageFolderPath: '${widget.response?.uuid}',
+                              maxWidth: 480.00,
+                              maxHeight: 480.00,
                               allowPhoto: true,
                               pickerFontFamily: 'Montserrat',
                             );

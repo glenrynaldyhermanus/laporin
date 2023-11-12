@@ -142,6 +142,21 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
             response: params.getParam<ResponsesRow>(
                 'response', ParamType.SupabaseRow),
           ),
+        ),
+        FFRoute(
+          name: 'ClockIn',
+          path: '/clockIn',
+          requireAuth: true,
+          builder: (context, params) => ClockInWidget(),
+        ),
+        FFRoute(
+          name: 'ClockOut',
+          path: '/clockOut',
+          requireAuth: true,
+          builder: (context, params) => ClockOutWidget(
+            attendance: params.getParam<UserAttendancesRow>(
+                'attendance', ParamType.SupabaseRow),
+          ),
         )
       ].map((r) => r.toRoute(appStateNotifier)).toList(),
     );

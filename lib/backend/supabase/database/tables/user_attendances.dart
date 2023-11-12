@@ -31,4 +31,10 @@ class UserAttendancesRow extends SupabaseDataRow {
   DateTime? get clockedOutAt => getField<DateTime>('clocked_out_at');
   set clockedOutAt(DateTime? value) =>
       setField<DateTime>('clocked_out_at', value);
+
+  String? get picturedIn => getField<String>('pictured_in');
+  set picturedIn(String? value) => setField<String>('pictured_in', value);
+
+  String? get picturedOut => getField<String>('pictured_out');
+  set picturedOut(String? value) => setField<String>('pictured_out', value);
 }

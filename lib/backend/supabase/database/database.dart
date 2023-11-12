@@ -8,6 +8,7 @@ export 'table.dart';
 export 'tables/roles.dart';
 export 'tables/forms.dart';
 export 'tables/businesses.dart';
+export 'tables/field_options.dart';
 export 'tables/response_fields.dart';
 export 'tables/pages.dart';
 export 'tables/users.dart';
