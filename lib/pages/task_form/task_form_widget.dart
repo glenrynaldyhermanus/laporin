@@ -154,10 +154,11 @@ class _TaskFormWidgetState extends State<TaskFormWidget> {
                           }
                           List<FieldsRow> listViewFieldsRowList =
                               snapshot.data!;
-                          return ListView.builder(
+                          return ListView.separated(
                             padding: EdgeInsets.zero,
                             scrollDirection: Axis.vertical,
                             itemCount: listViewFieldsRowList.length,
+                            separatorBuilder: (_, __) => SizedBox(height: 16.0),
                             itemBuilder: (context, listViewIndex) {
                               final listViewFieldsRow =
                                   listViewFieldsRowList[listViewIndex];
