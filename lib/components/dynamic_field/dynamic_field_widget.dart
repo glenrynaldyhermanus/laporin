@@ -241,10 +241,16 @@ class _DynamicFieldWidgetState extends State<DynamicFieldWidget> {
                                 return;
                               }
                             },
-                            controller:
-                                _model.singleSelectionValueController ??=
-                                    FormFieldController<String>(
-                                        containerResponseFieldsRow!.answer!),
+                            controller: _model
+                                    .singleSelectionValueController ??=
+                                FormFieldController<String>(
+                                    containerResponseFieldsRow?.answer !=
+                                                null &&
+                                            containerResponseFieldsRow
+                                                    ?.answer !=
+                                                ''
+                                        ? containerResponseFieldsRow!.answer!
+                                        : ' '),
                             optionHeight: 32.0,
                             textStyle: FlutterFlowTheme.of(context).labelMedium,
                             selectedTextStyle:

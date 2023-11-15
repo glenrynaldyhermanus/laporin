@@ -193,7 +193,7 @@ class _TaskFormWidgetState extends State<TaskFormWidget> {
                       text: 'Save',
                       options: FFButtonOptions(
                         width: double.infinity,
-                        height: 40.0,
+                        height: 48.0,
                         padding: EdgeInsetsDirectional.fromSTEB(
                             24.0, 0.0, 24.0, 0.0),
                         iconPadding:
@@ -204,7 +204,7 @@ class _TaskFormWidgetState extends State<TaskFormWidget> {
                                   fontFamily: 'Montserrat',
                                   color: Colors.white,
                                 ),
-                        elevation: 3.0,
+                        elevation: 0.0,
                         borderSide: BorderSide(
                           color: Colors.transparent,
                           width: 1.0,
