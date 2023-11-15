@@ -5,6 +5,7 @@ import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/upload_data.dart';
+import '/flutter_flow/custom_functions.dart' as functions;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -24,6 +25,7 @@ class _ClockInWidgetState extends State<ClockInWidget> {
   late ClockInModel _model;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
+  LatLng? currentUserLocationValue;
 
   @override
   void initState() {
@@ -232,11 +234,18 @@ class _ClockInWidgetState extends State<ClockInWidget> {
                           EdgeInsetsDirectional.fromSTEB(0.0, 24.0, 0.0, 0.0),
                       child: FFButtonWidget(
                         onPressed: () async {
+                          currentUserLocationValue =
+                              await getCurrentUserLocation(
+                                  defaultLocation: LatLng(0.0, 0.0));
                           await UserAttendancesTable().insert({
                             'user_id': FFAppState().authUser.id,
                             'clocked_in_at':
                                 supaSerialize<DateTime>(getCurrentTimestamp),
                             'pictured_in': _model.uploadedFileUrl,
+                            'geo_latitude_in': functions
+                                .getLatitude(currentUserLocationValue!),
+                            'geo_longitude_in': functions
+                                .getLongitude(currentUserLocationValue!),
                           });
                           context.safePop();
                         },

@@ -363,12 +363,27 @@ class _HomeWidgetState extends State<HomeWidget> with TickerProviderStateMixin {
                                 highlightColor: Colors.transparent,
                                 onTap: () async {
                                   if (rowUserAttendancesRow != null) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          'You already clocked in',
+                                          style: TextStyle(
+                                            color: FlutterFlowTheme.of(context)
+                                                .primaryText,
+                                          ),
+                                        ),
+                                        duration: Duration(milliseconds: 4000),
+                                        backgroundColor:
+                                            FlutterFlowTheme.of(context)
+                                                .secondary,
+                                      ),
+                                    );
+                                    return;
+                                  } else {
+                                    context.pushNamed('ClockIn');
+
                                     return;
                                   }
-
-                                  context.pushNamed('ClockIn');
-
-                                  return;
                                 },
                                 child: Container(
                                   height: 80.0,
@@ -449,18 +464,55 @@ class _HomeWidgetState extends State<HomeWidget> with TickerProviderStateMixin {
                                 highlightColor: Colors.transparent,
                                 onTap: () async {
                                   if (rowUserAttendancesRow != null) {
-                                    context.pushNamed(
-                                      'ClockOut',
-                                      queryParameters: {
-                                        'attendance': serializeParam(
-                                          rowUserAttendancesRow,
-                                          ParamType.SupabaseRow,
+                                    if (rowUserAttendancesRow?.clockedOutAt !=
+                                        null) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            'You already clocked out',
+                                            style: TextStyle(
+                                              color:
+                                                  FlutterFlowTheme.of(context)
+                                                      .primaryText,
+                                            ),
+                                          ),
+                                          duration:
+                                              Duration(milliseconds: 4000),
+                                          backgroundColor:
+                                              FlutterFlowTheme.of(context)
+                                                  .secondary,
                                         ),
-                                      }.withoutNulls,
-                                    );
+                                      );
+                                    } else {
+                                      context.pushNamed(
+                                        'ClockOut',
+                                        queryParameters: {
+                                          'attendance': serializeParam(
+                                            rowUserAttendancesRow,
+                                            ParamType.SupabaseRow,
+                                          ),
+                                        }.withoutNulls,
+                                      );
+                                    }
 
                                     return;
                                   } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          'Please clock in before clock out',
+                                          style: TextStyle(
+                                            color: FlutterFlowTheme.of(context)
+                                                .primaryText,
+                                          ),
+                                        ),
+                                        duration: Duration(milliseconds: 4000),
+                                        backgroundColor:
+                                            FlutterFlowTheme.of(context)
+                                                .secondary,
+                                      ),
+                                    );
                                     return;
                                   }
                                 },
@@ -559,14 +611,14 @@ class _HomeWidgetState extends State<HomeWidget> with TickerProviderStateMixin {
                 ).animateOnPageLoad(animationsMap['textOnPageLoadAnimation5']!),
               ),
               Expanded(
-                child: FutureBuilder<List<TaskAssigneesRow>>(
-                  future: TaskAssigneesTable().queryRows(
+                child: FutureBuilder<List<TasksViewRow>>(
+                  future: TasksViewTable().queryRows(
                     queryFn: (q) => q
                         .eq(
                           'user_id',
                           FFAppState().authUser.id,
                         )
-                        .order('created_at', ascending: true),
+                        .order('due_at', ascending: true),
                   ),
                   builder: (context, snapshot) {
                     // Customize what your widget looks like when it's loading.
@@ -582,243 +634,212 @@ class _HomeWidgetState extends State<HomeWidget> with TickerProviderStateMixin {
                         ),
                       );
                     }
-                    List<TaskAssigneesRow> listViewTaskAssigneesRowList =
+                    List<TasksViewRow> listViewTasksViewRowList =
                         snapshot.data!;
                     return ListView.builder(
                       padding: EdgeInsets.zero,
                       scrollDirection: Axis.vertical,
-                      itemCount: listViewTaskAssigneesRowList.length,
+                      itemCount: listViewTasksViewRowList.length,
                       itemBuilder: (context, listViewIndex) {
-                        final listViewTaskAssigneesRow =
-                            listViewTaskAssigneesRowList[listViewIndex];
-                        return FutureBuilder<List<TasksRow>>(
-                          future: TasksTable().querySingleRow(
-                            queryFn: (q) => q.eq(
-                              'id',
-                              listViewTaskAssigneesRow.taskId,
-                            ),
+                        final listViewTasksViewRow =
+                            listViewTasksViewRowList[listViewIndex];
+                        return Container(
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            color: FlutterFlowTheme.of(context)
+                                .secondaryBackground,
                           ),
-                          builder: (context, snapshot) {
-                            // Customize what your widget looks like when it's loading.
-                            if (!snapshot.hasData) {
-                              return Center(
-                                child: SizedBox(
-                                  width: 50.0,
-                                  height: 50.0,
-                                  child: SpinKitFoldingCube(
-                                    color: FlutterFlowTheme.of(context).primary,
-                                    size: 50.0,
-                                  ),
-                                ),
-                              );
-                            }
-                            List<TasksRow> containerTasksRowList =
-                                snapshot.data!;
-                            final containerTasksRow =
-                                containerTasksRowList.isNotEmpty
-                                    ? containerTasksRowList.first
-                                    : null;
-                            return Container(
-                              width: double.infinity,
-                              decoration: BoxDecoration(
-                                color: FlutterFlowTheme.of(context)
-                                    .secondaryBackground,
-                              ),
-                              child: Visibility(
-                                visible: containerTasksRow?.status == 1,
-                                child: Padding(
-                                  padding: EdgeInsetsDirectional.fromSTEB(
-                                      16.0, 12.0, 16.0, 0.0),
-                                  child: InkWell(
-                                    splashColor: Colors.transparent,
-                                    focusColor: Colors.transparent,
-                                    hoverColor: Colors.transparent,
-                                    highlightColor: Colors.transparent,
-                                    onTap: () async {
-                                      var _shouldSetState = false;
-                                      _model.response =
-                                          await actions.getResponseByUserTask(
-                                        FFAppState().authUser.id,
-                                        containerTasksRow!.id,
-                                      );
-                                      _shouldSetState = true;
-                                      if (_model.response != null) {
-                                        await ResponsesTable().update(
-                                          data: {
-                                            'resume_at':
-                                                supaSerialize<DateTime>(
-                                                    getCurrentTimestamp),
-                                          },
-                                          matchingRows: (rows) => rows.eq(
-                                            'id',
-                                            _model.response?.id,
-                                          ),
-                                        );
-
-                                        context.pushNamed(
-                                          'TaskForm',
-                                          queryParameters: {
-                                            'task': serializeParam(
-                                              containerTasksRow,
-                                              ParamType.SupabaseRow,
-                                            ),
-                                            'response': serializeParam(
-                                              _model.response,
-                                              ParamType.SupabaseRow,
-                                            ),
-                                          }.withoutNulls,
-                                        );
-
-                                        if (_shouldSetState) setState(() {});
-                                        return;
-                                      } else {
-                                        _model.newResponse =
-                                            await ResponsesTable().insert({
-                                          'task_id': containerTasksRow?.id,
-                                          'user_id': FFAppState().authUser.id,
-                                          'start_at': supaSerialize<DateTime>(
-                                              getCurrentTimestamp),
-                                        });
-                                        _shouldSetState = true;
-
-                                        context.pushNamed(
-                                          'TaskForm',
-                                          queryParameters: {
-                                            'task': serializeParam(
-                                              containerTasksRow,
-                                              ParamType.SupabaseRow,
-                                            ),
-                                            'response': serializeParam(
-                                              _model.newResponse,
-                                              ParamType.SupabaseRow,
-                                            ),
-                                          }.withoutNulls,
-                                        );
-
-                                        if (_shouldSetState) setState(() {});
-                                        return;
-                                      }
-
-                                      if (_shouldSetState) setState(() {});
-                                    },
-                                    child: Container(
-                                      width: double.infinity,
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        boxShadow: [
-                                          BoxShadow(
-                                            blurRadius: 4.0,
-                                            color: Color(0x1F000000),
-                                            offset: Offset(0.0, 2.0),
-                                          )
-                                        ],
-                                        borderRadius:
-                                            BorderRadius.circular(8.0),
-                                        border: Border.all(
-                                          color: Color(0xFFF1F4F8),
-                                          width: 1.0,
-                                        ),
+                          child: Visibility(
+                            visible: listViewTasksViewRow.status == 1,
+                            child: Padding(
+                              padding: EdgeInsetsDirectional.fromSTEB(
+                                  16.0, 12.0, 16.0, 0.0),
+                              child: InkWell(
+                                splashColor: Colors.transparent,
+                                focusColor: Colors.transparent,
+                                hoverColor: Colors.transparent,
+                                highlightColor: Colors.transparent,
+                                onTap: () async {
+                                  var _shouldSetState = false;
+                                  _model.response =
+                                      await actions.getResponseByUserTask(
+                                    FFAppState().authUser.id,
+                                    listViewTasksViewRow.id!,
+                                  );
+                                  _shouldSetState = true;
+                                  if (_model.response != null) {
+                                    await ResponsesTable().update(
+                                      data: {
+                                        'resume_at': supaSerialize<DateTime>(
+                                            getCurrentTimestamp),
+                                      },
+                                      matchingRows: (rows) => rows.eq(
+                                        'id',
+                                        _model.response?.id,
                                       ),
-                                      child: Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            16.0, 16.0, 16.0, 16.0),
-                                        child: Row(
+                                    );
+
+                                    context.pushNamed(
+                                      'TaskForm',
+                                      queryParameters: {
+                                        'task': serializeParam(
+                                          listViewTasksViewRow,
+                                          ParamType.SupabaseRow,
+                                        ),
+                                        'response': serializeParam(
+                                          _model.response,
+                                          ParamType.SupabaseRow,
+                                        ),
+                                      }.withoutNulls,
+                                    );
+
+                                    if (_shouldSetState) setState(() {});
+                                    return;
+                                  } else {
+                                    _model.newResponse =
+                                        await ResponsesTable().insert({
+                                      'task_id': listViewTasksViewRow.id,
+                                      'user_id': FFAppState().authUser.id,
+                                      'start_at': supaSerialize<DateTime>(
+                                          getCurrentTimestamp),
+                                    });
+                                    _shouldSetState = true;
+
+                                    context.pushNamed(
+                                      'TaskForm',
+                                      queryParameters: {
+                                        'task': serializeParam(
+                                          listViewTasksViewRow,
+                                          ParamType.SupabaseRow,
+                                        ),
+                                        'response': serializeParam(
+                                          _model.newResponse,
+                                          ParamType.SupabaseRow,
+                                        ),
+                                      }.withoutNulls,
+                                    );
+
+                                    if (_shouldSetState) setState(() {});
+                                    return;
+                                  }
+
+                                  if (_shouldSetState) setState(() {});
+                                },
+                                child: Container(
+                                  width: double.infinity,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        blurRadius: 4.0,
+                                        color: Color(0x1F000000),
+                                        offset: Offset(0.0, 2.0),
+                                      )
+                                    ],
+                                    borderRadius: BorderRadius.circular(8.0),
+                                    border: Border.all(
+                                      color: Color(0xFFF1F4F8),
+                                      width: 1.0,
+                                    ),
+                                  ),
+                                  child: Padding(
+                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                        16.0, 16.0, 16.0, 16.0),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.max,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Container(
+                                          width: 36.0,
+                                          height: 36.0,
+                                          decoration: BoxDecoration(
+                                            color: Color(0x3371C1F9),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Icon(
+                                            Icons.propane_tank_outlined,
+                                            color: FlutterFlowTheme.of(context)
+                                                .primary,
+                                            size: 24.0,
+                                          ),
+                                        ),
+                                        Column(
                                           mainAxisSize: MainAxisSize.max,
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
                                           children: [
-                                            Container(
-                                              width: 36.0,
-                                              height: 36.0,
-                                              decoration: BoxDecoration(
-                                                color: Color(0x3371C1F9),
-                                                shape: BoxShape.circle,
-                                              ),
-                                              child: Icon(
-                                                Icons.propane_tank_outlined,
-                                                color:
-                                                    FlutterFlowTheme.of(context)
-                                                        .primary,
-                                                size: 24.0,
-                                              ),
+                                            Text(
+                                              listViewTasksViewRow.name!,
+                                              style:
+                                                  FlutterFlowTheme.of(context)
+                                                      .bodyMedium,
                                             ),
                                             Column(
                                               mainAxisSize: MainAxisSize.max,
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
                                               children: [
-                                                Text(
-                                                  containerTasksRow!.name,
-                                                  style: FlutterFlowTheme.of(
-                                                          context)
-                                                      .bodyMedium,
-                                                ),
-                                                Column(
+                                                Row(
                                                   mainAxisSize:
                                                       MainAxisSize.max,
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
                                                   children: [
-                                                    Row(
-                                                      mainAxisSize:
-                                                          MainAxisSize.max,
-                                                      children: [
-                                                        Icon(
-                                                          Icons
-                                                              .location_on_rounded,
-                                                          color: FlutterFlowTheme
-                                                                  .of(context)
+                                                    Icon(
+                                                      Icons.location_on_rounded,
+                                                      color:
+                                                          FlutterFlowTheme.of(
+                                                                  context)
                                                               .secondaryText,
-                                                          size: 16.0,
-                                                        ),
-                                                        Text(
-                                                          containerTasksRow!
-                                                              .location!,
-                                                          style: FlutterFlowTheme
-                                                                  .of(context)
-                                                              .bodyMedium,
-                                                        ),
-                                                      ].divide(
-                                                          SizedBox(width: 8.0)),
+                                                      size: 16.0,
                                                     ),
-                                                    Row(
-                                                      mainAxisSize:
-                                                          MainAxisSize.max,
-                                                      children: [
-                                                        Icon(
-                                                          Icons
-                                                              .access_time_sharp,
-                                                          color: FlutterFlowTheme
-                                                                  .of(context)
-                                                              .secondaryText,
-                                                          size: 16.0,
-                                                        ),
-                                                        Text(
-                                                          dateTimeFormat(
-                                                              'yMMMd',
-                                                              containerTasksRow!
-                                                                  .dueAt!),
-                                                          style: FlutterFlowTheme
-                                                                  .of(context)
+                                                    Text(
+                                                      listViewTasksViewRow
+                                                          .location!,
+                                                      style:
+                                                          FlutterFlowTheme.of(
+                                                                  context)
                                                               .bodyMedium,
-                                                        ),
-                                                      ].divide(
-                                                          SizedBox(width: 8.0)),
                                                     ),
-                                                  ],
+                                                  ].divide(
+                                                      SizedBox(width: 8.0)),
                                                 ),
-                                              ].divide(SizedBox(height: 8.0)),
+                                                Row(
+                                                  mainAxisSize:
+                                                      MainAxisSize.max,
+                                                  children: [
+                                                    Icon(
+                                                      Icons.access_time_sharp,
+                                                      color:
+                                                          FlutterFlowTheme.of(
+                                                                  context)
+                                                              .secondaryText,
+                                                      size: 16.0,
+                                                    ),
+                                                    Text(
+                                                      dateTimeFormat(
+                                                          'd/M H:mm',
+                                                          listViewTasksViewRow
+                                                              .dueAt!),
+                                                      style:
+                                                          FlutterFlowTheme.of(
+                                                                  context)
+                                                              .bodyMedium,
+                                                    ),
+                                                  ].divide(
+                                                      SizedBox(width: 8.0)),
+                                                ),
+                                              ],
                                             ),
-                                          ].divide(SizedBox(width: 16.0)),
+                                          ].divide(SizedBox(height: 8.0)),
                                         ),
-                                      ),
+                                      ].divide(SizedBox(width: 16.0)),
                                     ),
-                                  ).animateOnPageLoad(animationsMap[
-                                      'containerOnPageLoadAnimation3']!),
+                                  ),
                                 ),
-                              ),
-                            );
-                          },
+                              ).animateOnPageLoad(animationsMap[
+                                  'containerOnPageLoadAnimation3']!),
+                            ),
+                          ),
                         );
                       },
                     );

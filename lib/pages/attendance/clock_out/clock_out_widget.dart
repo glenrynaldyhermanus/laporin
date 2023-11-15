@@ -5,6 +5,7 @@ import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/upload_data.dart';
+import '/flutter_flow/custom_functions.dart' as functions;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -29,6 +30,7 @@ class _ClockOutWidgetState extends State<ClockOutWidget> {
   late ClockOutModel _model;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
+  LatLng? currentUserLocationValue;
 
   @override
   void initState() {
@@ -237,11 +239,18 @@ class _ClockOutWidgetState extends State<ClockOutWidget> {
                           EdgeInsetsDirectional.fromSTEB(0.0, 24.0, 0.0, 0.0),
                       child: FFButtonWidget(
                         onPressed: () async {
+                          currentUserLocationValue =
+                              await getCurrentUserLocation(
+                                  defaultLocation: LatLng(0.0, 0.0));
                           await UserAttendancesTable().update(
                             data: {
                               'clocked_out_at':
                                   supaSerialize<DateTime>(getCurrentTimestamp),
                               'pictured_out': _model.uploadedFileUrl,
+                              'geo_latitude_out': functions
+                                  .getLatitude(currentUserLocationValue!),
+                              'geo_longitude_out': functions
+                                  .getLongitude(currentUserLocationValue!),
                             },
                             matchingRows: (rows) => rows.eq(
                               'user_id',
