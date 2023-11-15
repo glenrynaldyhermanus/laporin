@@ -19,7 +19,7 @@ class TaskFormWidget extends StatefulWidget {
     required this.response,
   }) : super(key: key);
 
-  final TasksRow? task;
+  final TasksViewRow? task;
   final ResponsesRow? response;
 
   @override

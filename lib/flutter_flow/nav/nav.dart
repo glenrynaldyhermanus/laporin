@@ -138,7 +138,7 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           path: '/task/form',
           requireAuth: true,
           builder: (context, params) => TaskFormWidget(
-            task: params.getParam<TasksRow>('task', ParamType.SupabaseRow),
+            task: params.getParam<TasksViewRow>('task', ParamType.SupabaseRow),
             response: params.getParam<ResponsesRow>(
                 'response', ParamType.SupabaseRow),
           ),

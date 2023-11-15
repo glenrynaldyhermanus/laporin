@@ -37,4 +37,20 @@ class UserAttendancesRow extends SupabaseDataRow {
 
   String? get picturedOut => getField<String>('pictured_out');
   set picturedOut(String? value) => setField<String>('pictured_out', value);
+
+  double? get geoLatitudeIn => getField<double>('geo_latitude_in');
+  set geoLatitudeIn(double? value) =>
+      setField<double>('geo_latitude_in', value);
+
+  double? get geoLongitudeIn => getField<double>('geo_longitude_in');
+  set geoLongitudeIn(double? value) =>
+      setField<double>('geo_longitude_in', value);
+
+  double? get geoLatitudeOut => getField<double>('geo_latitude_out');
+  set geoLatitudeOut(double? value) =>
+      setField<double>('geo_latitude_out', value);
+
+  double? get geoLongitudeOut => getField<double>('geo_longitude_out');
+  set geoLongitudeOut(double? value) =>
+      setField<double>('geo_longitude_out', value);
 }

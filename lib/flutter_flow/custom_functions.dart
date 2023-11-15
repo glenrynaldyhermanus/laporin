@@ -24,3 +24,12 @@ DateTime startingDate(DateTime timestamp) {
 DateTime endingDate(DateTime timestamp) {
   return DateTime(timestamp.year, timestamp.month, timestamp.day, 23, 59, 59);
 }
+
+double getLatitude(LatLng latLng) {
+  // get latitude of latLng
+  return latLng.latitude;
+}
+
+double getLongitude(LatLng latLng) {
+  return latLng.longitude;
+}

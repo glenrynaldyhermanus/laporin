@@ -11,6 +11,7 @@ export 'tables/businesses.dart';
 export 'tables/field_options.dart';
 export 'tables/response_fields.dart';
 export 'tables/pages.dart';
+export 'tables/tasks_view.dart';
 export 'tables/users.dart';
 export 'tables/responses.dart';
 export 'tables/fields.dart';

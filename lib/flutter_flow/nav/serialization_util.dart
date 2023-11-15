@@ -227,6 +227,8 @@ dynamic deserializeParam<T>(
             return ResponseFieldsRow(data);
           case PagesRow:
             return PagesRow(data);
+          case TasksViewRow:
+            return TasksViewRow(data);
           case UsersRow:
             return UsersRow(data);
           case ResponsesRow:
