@@ -11,6 +11,7 @@ import 'package:file_picker/_internal/file_picker_web.dart';
 import 'package:firebase_core_web/firebase_core_web.dart';
 import 'package:firebase_performance_web/firebase_performance_web.dart';
 import 'package:flutter_native_splash/flutter_native_splash_web.dart';
+import 'package:geolocator_web/geolocator_web.dart';
 import 'package:image_picker_for_web/image_picker_for_web.dart';
 import 'package:shared_preferences_web/shared_preferences_web.dart';
 import 'package:sign_in_with_apple_web/sign_in_with_apple_web.dart';
@@ -25,6 +26,7 @@ void registerPlugins([final Registrar? pluginRegistrar]) {
   FirebaseCoreWeb.registerWith(registrar);
   FirebasePerformanceWeb.registerWith(registrar);
   FlutterNativeSplashWeb.registerWith(registrar);
+  GeolocatorPlugin.registerWith(registrar);
   ImagePickerPlugin.registerWith(registrar);
   SharedPreferencesPlugin.registerWith(registrar);
   SignInWithApplePlugin.registerWith(registrar);
