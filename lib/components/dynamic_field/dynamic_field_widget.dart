@@ -190,23 +190,76 @@ class _DynamicFieldWidgetState extends State<DynamicFieldWidget> {
                             _model.textControllerValidator.asValidator(context),
                       );
                     } else if (widget.field?.fieldTypeId == 4) {
-                      return FlutterFlowRadioButton(
-                        options: ['Option 1', 'Option 2'].toList(),
-                        onChanged: (val) => setState(() {}),
-                        controller: _model.singleSelectionValueController ??=
-                            FormFieldController<String>(null),
-                        optionHeight: 32.0,
-                        textStyle: FlutterFlowTheme.of(context).labelMedium,
-                        selectedTextStyle:
-                            FlutterFlowTheme.of(context).bodyMedium,
-                        buttonPosition: RadioButtonPosition.left,
-                        direction: Axis.vertical,
-                        radioButtonColor: FlutterFlowTheme.of(context).primary,
-                        inactiveRadioButtonColor:
-                            FlutterFlowTheme.of(context).secondaryText,
-                        toggleable: false,
-                        horizontalAlignment: WrapAlignment.start,
-                        verticalAlignment: WrapCrossAlignment.start,
+                      return FutureBuilder<List<FieldOptionsRow>>(
+                        future: FieldOptionsTable().queryRows(
+                          queryFn: (q) => q.eq(
+                            'field_id',
+                            widget.field?.id,
+                          ),
+                        ),
+                        builder: (context, snapshot) {
+                          // Customize what your widget looks like when it's loading.
+                          if (!snapshot.hasData) {
+                            return Center(
+                              child: SizedBox(
+                                width: 50.0,
+                                height: 50.0,
+                                child: SpinKitFoldingCube(
+                                  color: FlutterFlowTheme.of(context).primary,
+                                  size: 50.0,
+                                ),
+                              ),
+                            );
+                          }
+                          List<FieldOptionsRow>
+                              singleSelectionFieldOptionsRowList =
+                              snapshot.data!;
+                          return FlutterFlowRadioButton(
+                            options: singleSelectionFieldOptionsRowList
+                                .map((e) => e.option)
+                                .toList()
+                                .toList(),
+                            onChanged: (val) async {
+                              setState(() {});
+                              if (containerResponseFieldsRow != null) {
+                                await ResponseFieldsTable().update(
+                                  data: {
+                                    'answer': _model.singleSelectionValue,
+                                  },
+                                  matchingRows: (rows) => rows.eq(
+                                    'id',
+                                    widget.response?.id,
+                                  ),
+                                );
+                                return;
+                              } else {
+                                await ResponseFieldsTable().insert({
+                                  'field_id': widget.field?.id,
+                                  'response_id': widget.response?.id,
+                                  'answer': _model.singleSelectionValue,
+                                });
+                                return;
+                              }
+                            },
+                            controller:
+                                _model.singleSelectionValueController ??=
+                                    FormFieldController<String>(
+                                        containerResponseFieldsRow!.answer!),
+                            optionHeight: 32.0,
+                            textStyle: FlutterFlowTheme.of(context).labelMedium,
+                            selectedTextStyle:
+                                FlutterFlowTheme.of(context).bodyMedium,
+                            buttonPosition: RadioButtonPosition.left,
+                            direction: Axis.vertical,
+                            radioButtonColor:
+                                FlutterFlowTheme.of(context).primary,
+                            inactiveRadioButtonColor:
+                                FlutterFlowTheme.of(context).secondaryText,
+                            toggleable: false,
+                            horizontalAlignment: WrapAlignment.start,
+                            verticalAlignment: WrapCrossAlignment.start,
+                          );
+                        },
                       );
                     } else if (widget.field?.fieldTypeId == 6) {
                       return Column(
@@ -227,7 +280,7 @@ class _DynamicFieldWidgetState extends State<DynamicFieldWidget> {
                                           '') {
                                     return containerResponseFieldsRow!.answer!;
                                   } else {
-                                    return 'https://placehold.co/600?text=No+image';
+                                    return 'https://i0.wp.com/fisip.umrah.ac.id/wp-content/uploads/2022/12/placeholder-2.png';
                                   }
                                 }(),
                               ),
