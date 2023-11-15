@@ -227,7 +227,7 @@ class _DynamicFieldWidgetState extends State<DynamicFieldWidget> {
                                           '') {
                                     return containerResponseFieldsRow!.answer!;
                                   } else {
-                                    return 'https://placehold.co/600?text=No+image';
+                                    return 'https://i0.wp.com/fisip.umrah.ac.id/wp-content/uploads/2022/12/placeholder-2.png';
                                   }
                                 }(),
                               ),
