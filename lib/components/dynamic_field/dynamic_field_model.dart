@@ -2,6 +2,7 @@ import '/backend/supabase/supabase.dart';
 import '/flutter_flow/flutter_flow_radio_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
+import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/form_field_controller.dart';
 import '/flutter_flow/upload_data.dart';
 import '/custom_code/actions/index.dart' as actions;
@@ -28,9 +29,6 @@ class DynamicFieldModel extends FlutterFlowModel<DynamicFieldWidget> {
   FFUploadedFile uploadedLocalFile =
       FFUploadedFile(bytes: Uint8List.fromList([]));
   String uploadedFileUrl = '';
-
-  // Stores action output result for [Custom Action - getResponseField] action in Picture widget.
-  ResponseFieldsRow? responseField;
 
   /// Initialization and disposal methods.
 
