@@ -2,6 +2,7 @@ import '/backend/supabase/supabase.dart';
 import '/flutter_flow/flutter_flow_radio_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
+import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/form_field_controller.dart';
 import '/flutter_flow/upload_data.dart';
 import '/custom_code/actions/index.dart' as actions;
@@ -153,7 +154,6 @@ class _DynamicFieldWidgetState extends State<DynamicFieldWidget> {
                             if (_shouldSetState) setState(() {});
                           },
                         ),
-                        autofocus: true,
                         obscureText: false,
                         decoration: InputDecoration(
                           enabledBorder: OutlineInputBorder(
@@ -209,147 +209,157 @@ class _DynamicFieldWidgetState extends State<DynamicFieldWidget> {
                         verticalAlignment: WrapCrossAlignment.start,
                       );
                     } else if (widget.field?.fieldTypeId == 6) {
-                      return Builder(
-                        builder: (context) {
-                          if (_model.textController.text != null &&
-                              _model.textController.text != '') {
-                            return ClipRRect(
-                              borderRadius: BorderRadius.circular(16.0),
-                              child: Image.network(
-                                getCORSProxyUrl(
-                                  'https://picsum.photos/seed/623/600',
-                                ),
-                                width: double.infinity,
-                                height: 180.0,
-                                fit: BoxFit.cover,
-                              ),
-                            );
-                          } else {
-                            return InkWell(
-                              splashColor: Colors.transparent,
-                              focusColor: Colors.transparent,
-                              hoverColor: Colors.transparent,
-                              highlightColor: Colors.transparent,
-                              onTap: () async {
-                                var _shouldSetState = false;
-                                final selectedMedia =
-                                    await selectMediaWithSourceBottomSheet(
-                                  context: context,
-                                  storageFolderPath: '${widget.response?.uuid}',
-                                  maxWidth: 480.00,
-                                  maxHeight: 480.00,
-                                  allowPhoto: true,
-                                  pickerFontFamily: 'Montserrat',
-                                );
-                                if (selectedMedia != null &&
-                                    selectedMedia.every((m) =>
-                                        validateFileFormat(
-                                            m.storagePath, context))) {
-                                  setState(() => _model.isDataUploading = true);
-                                  var selectedUploadedFiles =
-                                      <FFUploadedFile>[];
-
-                                  var downloadUrls = <String>[];
-                                  try {
-                                    selectedUploadedFiles = selectedMedia
-                                        .map((m) => FFUploadedFile(
-                                              name:
-                                                  m.storagePath.split('/').last,
-                                              bytes: m.bytes,
-                                              height: m.dimensions?.height,
-                                              width: m.dimensions?.width,
-                                              blurHash: m.blurHash,
-                                            ))
-                                        .toList();
-
-                                    downloadUrls =
-                                        await uploadSupabaseStorageFiles(
-                                      bucketName: 'responses',
-                                      selectedFiles: selectedMedia,
-                                    );
-                                  } finally {
-                                    _model.isDataUploading = false;
-                                  }
-                                  if (selectedUploadedFiles.length ==
-                                          selectedMedia.length &&
-                                      downloadUrls.length ==
-                                          selectedMedia.length) {
-                                    setState(() {
-                                      _model.uploadedLocalFile =
-                                          selectedUploadedFiles.first;
-                                      _model.uploadedFileUrl =
-                                          downloadUrls.first;
-                                    });
+                      return Column(
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(16.0),
+                            child: Image.network(
+                              getCORSProxyUrl(
+                                () {
+                                  if (_model.uploadedFileUrl != null &&
+                                      _model.uploadedFileUrl != '') {
+                                    return _model.uploadedFileUrl;
+                                  } else if (containerResponseFieldsRow
+                                              ?.answer !=
+                                          null &&
+                                      containerResponseFieldsRow?.answer !=
+                                          '') {
+                                    return containerResponseFieldsRow!.answer!;
                                   } else {
-                                    setState(() {});
+                                    return 'https://placehold.co/600?text=No+image';
+                                  }
+                                }(),
+                              ),
+                              width: double.infinity,
+                              height: 180.0,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                          Row(
+                            mainAxisSize: MainAxisSize.max,
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              FFButtonWidget(
+                                onPressed: () async {
+                                  final selectedMedia =
+                                      await selectMediaWithSourceBottomSheet(
+                                    context: context,
+                                    storageFolderPath:
+                                        '${widget.response?.uuid}',
+                                    maxWidth: 480.00,
+                                    maxHeight: 480.00,
+                                    allowPhoto: true,
+                                    pickerFontFamily: 'Montserrat',
+                                  );
+                                  if (selectedMedia != null &&
+                                      selectedMedia.every((m) =>
+                                          validateFileFormat(
+                                              m.storagePath, context))) {
+                                    setState(
+                                        () => _model.isDataUploading = true);
+                                    var selectedUploadedFiles =
+                                        <FFUploadedFile>[];
+
+                                    var downloadUrls = <String>[];
+                                    try {
+                                      selectedUploadedFiles = selectedMedia
+                                          .map((m) => FFUploadedFile(
+                                                name: m.storagePath
+                                                    .split('/')
+                                                    .last,
+                                                bytes: m.bytes,
+                                                height: m.dimensions?.height,
+                                                width: m.dimensions?.width,
+                                                blurHash: m.blurHash,
+                                              ))
+                                          .toList();
+
+                                      downloadUrls =
+                                          await uploadSupabaseStorageFiles(
+                                        bucketName: 'responses',
+                                        selectedFiles: selectedMedia,
+                                      );
+                                    } finally {
+                                      _model.isDataUploading = false;
+                                    }
+                                    if (selectedUploadedFiles.length ==
+                                            selectedMedia.length &&
+                                        downloadUrls.length ==
+                                            selectedMedia.length) {
+                                      setState(() {
+                                        _model.uploadedLocalFile =
+                                            selectedUploadedFiles.first;
+                                        _model.uploadedFileUrl =
+                                            downloadUrls.first;
+                                      });
+                                    } else {
+                                      setState(() {});
+                                      return;
+                                    }
+                                  }
+
+                                  if (containerResponseFieldsRow != null) {
+                                    await ResponseFieldsTable().update(
+                                      data: {
+                                        'answer': _model.uploadedFileUrl,
+                                      },
+                                      matchingRows: (rows) => rows.eq(
+                                        'id',
+                                        containerResponseFieldsRow?.id,
+                                      ),
+                                    );
+                                    return;
+                                  } else {
+                                    await ResponseFieldsTable().insert({
+                                      'field_id': widget.field?.id,
+                                      'response_id': widget.response?.id,
+                                      'answer': _model.uploadedFileUrl,
+                                    });
                                     return;
                                   }
-                                }
-
-                                _model.responseField =
-                                    await actions.getResponseField(
-                                  widget.field!.id,
-                                  widget.response!.id,
-                                );
-                                _shouldSetState = true;
-                                if (_model.responseField != null) {
-                                  await ResponseFieldsTable().update(
-                                    data: {
-                                      'answer': _model.uploadedFileUrl,
-                                    },
-                                    matchingRows: (rows) => rows.eq(
-                                      'id',
-                                      _model.responseField?.id,
-                                    ),
-                                  );
-                                  if (_shouldSetState) setState(() {});
-                                  return;
-                                } else {
-                                  await ResponseFieldsTable().insert({
-                                    'field_id': widget.field?.id,
-                                    'response_id': widget.response?.id,
-                                    'answer': _model.uploadedFileUrl,
-                                  });
-                                  if (_shouldSetState) setState(() {});
-                                  return;
-                                }
-
-                                if (_shouldSetState) setState(() {});
-                              },
-                              child: Container(
-                                width: double.infinity,
-                                height: 180.0,
-                                decoration: BoxDecoration(
+                                },
+                                text: () {
+                                  if (_model.uploadedFileUrl != null &&
+                                      _model.uploadedFileUrl != '') {
+                                    return 'Replace image';
+                                  } else if (containerResponseFieldsRow
+                                              ?.answer !=
+                                          null &&
+                                      containerResponseFieldsRow?.answer !=
+                                          '') {
+                                    return 'Replace image';
+                                  } else {
+                                    return 'Add image';
+                                  }
+                                }(),
+                                options: FFButtonOptions(
+                                  height: 40.0,
+                                  padding: EdgeInsetsDirectional.fromSTEB(
+                                      24.0, 0.0, 24.0, 0.0),
+                                  iconPadding: EdgeInsetsDirectional.fromSTEB(
+                                      0.0, 0.0, 0.0, 0.0),
                                   color: FlutterFlowTheme.of(context)
                                       .secondaryBackground,
-                                  borderRadius: BorderRadius.circular(16.0),
-                                  border: Border.all(
-                                    color: FlutterFlowTheme.of(context)
-                                        .secondaryText,
+                                  textStyle: FlutterFlowTheme.of(context)
+                                      .titleSmall
+                                      .override(
+                                        fontFamily: 'Montserrat',
+                                        color: FlutterFlowTheme.of(context)
+                                            .tertiary,
+                                      ),
+                                  elevation: 0.0,
+                                  borderSide: BorderSide(
+                                    color:
+                                        FlutterFlowTheme.of(context).tertiary,
                                     width: 1.0,
                                   ),
-                                ),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.max,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.camera_enhance_sharp,
-                                      color: FlutterFlowTheme.of(context)
-                                          .secondaryText,
-                                      size: 48.0,
-                                    ),
-                                    Text(
-                                      'Add a picture',
-                                      style: FlutterFlowTheme.of(context)
-                                          .bodyMedium,
-                                    ),
-                                  ],
+                                  borderRadius: BorderRadius.circular(8.0),
                                 ),
                               ),
-                            );
-                          }
-                        },
+                            ],
+                          ),
+                        ].divide(SizedBox(height: 8.0)),
                       );
                     } else {
                       return Container(
