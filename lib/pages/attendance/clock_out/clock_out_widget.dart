@@ -252,10 +252,15 @@ class _ClockOutWidgetState extends State<ClockOutWidget> {
                               'geo_longitude_out': functions
                                   .getLongitude(currentUserLocationValue!),
                             },
-                            matchingRows: (rows) => rows.eq(
-                              'user_id',
-                              FFAppState().authUser.id,
-                            ),
+                            matchingRows: (rows) => rows
+                                .eq(
+                                  'user_id',
+                                  FFAppState().authUser.id,
+                                )
+                                .eq(
+                                  'id',
+                                  widget.attendance?.id,
+                                ),
                           );
                           context.safePop();
                         },

@@ -153,7 +153,6 @@ class _DynamicFieldWidgetState extends State<DynamicFieldWidget> {
                             if (_shouldSetState) setState(() {});
                           },
                         ),
-                        autofocus: true,
                         obscureText: false,
                         decoration: InputDecoration(
                           enabledBorder: OutlineInputBorder(
